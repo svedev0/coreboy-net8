@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>coreboy.win</RootNamespace>
+    <AssemblyName>coreboy.win</AssemblyName>
+    <StartupObject>coreboy.win.Program</StartupObject>
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\coreboy\coreboy.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="EmulatorSurface.cs" />
+  </ItemGroup>
+
+</Project>
