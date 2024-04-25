@@ -1,6 +1,7 @@
 ﻿using coreboy.controller;
 using coreboy.gui;
 using Button = coreboy.controller.Button;
+using Tsmi = System.Windows.Forms.ToolStripMenuItem;
 
 namespace coreboy.win;
 
@@ -27,20 +28,32 @@ public partial class EmulatorSurface : Form, IController
 		{
 			Items =
 			{
-				new ToolStripMenuItem("Emulator")
+				new Tsmi("Emulator")
 				{
 					DropDownItems =
 					{
-						new ToolStripMenuItem("Load ROM", null, (sender, args) => { StartEmulation(); }),
-						new ToolStripMenuItem("Pause", null, (sender, args) => { _emulator?.TogglePause(); }),
-						new ToolStripMenuItem("Quit", null, (sender, args) => { Close(); })
+						new Tsmi("Load ROM", null, (sender, args) =>
+						{
+							StartEmulator();
+						}),
+						new Tsmi("Pause", null, (sender, args) =>
+						{
+							_emulator?.TogglePause();
+						}),
+						new Tsmi("Quit", null, (sender, args) =>
+						{
+							Close();
+						})
 					}
 				},
-				new ToolStripMenuItem("Graphics")
+				new Tsmi("Graphics")
 				{
 					DropDownItems =
 					{
-						new ToolStripMenuItem("Screenshot", null, (sender, args) => { Screenshot(); })
+						new Tsmi("Screenshot", null, (sender, args) =>
+						{
+							TakeScreenshot();
+						})
 					}
 				}
 			}
@@ -49,7 +62,6 @@ public partial class EmulatorSurface : Form, IController
 		Controls.Add(_pictureBox = new PictureBox
 		{
 			Top = _menu.Height,
-			Left = 0,
 			Width = BitmapDisplay.DisplayWidth * 5,
 			Height = BitmapDisplay.DisplayHeight * 5,
 			BackColor = Color.Black,
@@ -88,51 +100,47 @@ public partial class EmulatorSurface : Form, IController
 		Closed += (_, e) => { _cancellation.Cancel(); };
 	}
 
-	private void StartEmulation()
+	private void StartEmulator()
 	{
 		if (_emulator.Active)
 		{
 			_emulator.Stop(_cancellation);
 			_cancellation = new CancellationTokenSource();
 			_pictureBox.Image = null;
-			Thread.Sleep(100);
+			Task.Delay(100).Wait();
 		}
 
-		using var openFileDialog = new OpenFileDialog
+		using OpenFileDialog dialog = new()
 		{
-			Filter = "Gameboy ROM (*.gb)|*.gb| All files(*.*) |*.*",
+			Filter = "ROM files (*.gb;*.gbc)|*.gb;*.gbc| All files(*.*) |*.*",
 			FilterIndex = 0,
 			RestoreDirectory = true
 		};
 
-		if (openFileDialog.ShowDialog() == DialogResult.OK)
+		if (dialog.ShowDialog() == DialogResult.OK)
 		{
-			_gameboyOptions.Rom = openFileDialog.FileName;
+			_gameboyOptions.Rom = dialog.FileName;
 			_emulator.Run(_cancellation.Token);
 		}
 	}
 
-	private void Screenshot()
+	private void TakeScreenshot()
 	{
 		_emulator.TogglePause();
 
-		using var sfd = new SaveFileDialog
+		using SaveFileDialog dialog = new()
 		{
 			Filter = "Bitmap (*.bmp)|*.bmp",
 			FilterIndex = 0,
 			RestoreDirectory = true
 		};
 
-		var (success, romPath) = sfd.ShowDialog() == DialogResult.OK
-			? (true, sfd.FileName)
-			: (false, null);
-
-		if (success)
+		if (dialog.ShowDialog() == DialogResult.OK)
 		{
 			try
 			{
 				Monitor.Enter(_updateLock);
-				File.WriteAllBytes(sfd.FileName, _lastFrame);
+				File.WriteAllBytes(dialog.FileName, _lastFrame);
 			}
 			finally
 			{
@@ -145,42 +153,50 @@ public partial class EmulatorSurface : Form, IController
 
 	private void EmulatorSurface_KeyDown(object sender, KeyEventArgs e)
 	{
-		var button = _controls.ContainsKey(e.KeyCode) ? _controls[e.KeyCode] : null;
-		if (button != null)
+		if (_controls.TryGetValue(e.KeyCode, out var button))
 		{
-			_listener?.OnButtonPress(button);
+			_listener.OnButtonPress(button);
 		}
 	}
 
 	private void EmulatorSurface_KeyUp(object sender, KeyEventArgs e)
 	{
-		var button = _controls.ContainsKey(e.KeyCode) ? _controls[e.KeyCode] : null;
-		if (button != null)
+		if (_controls.TryGetValue(e.KeyCode, out var button))
 		{
-			_listener?.OnButtonRelease(button);
+			_listener.OnButtonRelease(button);
 		}
 	}
 
-	public void SetButtonListener(IButtonListener listener) => _listener = listener;
+	public void SetButtonListener(IButtonListener listener)
+	{
+		_listener = listener;
+	}
 
 	protected override void OnResize(EventArgs e)
 	{
 		base.OnResize(e);
-		if (_pictureBox == null) return;
+
+		if (_pictureBox == null)
+		{
+			return;
+		}
 
 		_pictureBox.Width = Width;
 		_pictureBox.Height = Height - _menu.Height - 50;
 	}
 
-	public void UpdateDisplay(object _, byte[] frame)
+	public void UpdateDisplay(object _, byte[] frameBytes)
 	{
-		if (!Monitor.TryEnter(_updateLock)) return;
+		if (!Monitor.TryEnter(_updateLock))
+		{
+			return;
+		}
 
 		try
 		{
-			_lastFrame = frame;
-			using var memoryStream = new MemoryStream(frame);
-			_pictureBox.Image = Image.FromStream(memoryStream);
+			_lastFrame = frameBytes;
+			using MemoryStream ms = new(frameBytes);
+			_pictureBox.Image = Image.FromStream(ms);
 		}
 		catch
 		{
@@ -195,7 +211,7 @@ public partial class EmulatorSurface : Form, IController
 	protected override void OnFormClosed(FormClosedEventArgs e)
 	{
 		base.OnFormClosed(e);
-		_pictureBox.Dispose();
+		Dispose(true);
 		Environment.Exit(0);
 	}
 }
