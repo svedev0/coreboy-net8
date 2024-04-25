@@ -26,7 +26,7 @@ public class GameboyOptions
 	public bool ForceGbc { get; set; }
 
 	[Option('b', "use-bootstrap")]
-	public bool UseBootstrap { get; set; }
+	public bool UseBootstrap { get; set; } = true;
 
 	[Option('i', "interactive")]
 	public bool Interactive { get; set; }
@@ -64,7 +64,7 @@ public class GameboyOptions
 		if (ForceDmg && ForceGbc)
 		{
 			throw new ArgumentException(
-				"force-dmg and force-gbc options are can't be used together");
+				"force-dmg and force-gbc cannot be used together");
 		}
 	}
 
