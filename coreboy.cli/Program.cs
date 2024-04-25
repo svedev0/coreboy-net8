@@ -7,23 +7,16 @@ public class Program
 	static void Main(string[] args)
 	{
 		CancellationTokenSource cancellation = new();
-		var arguments = GameboyOptions.Parse(args);
-		Emulator emulator = new(arguments);
+		var options = GameboyOptions.Parse(args);
+		Emulator emulator = new(options);
 
-		if (!arguments.RomSpecified)
+		if (!options.RomSpecified)
 		{
 			Console.WriteLine(GameboyOptions.UsageInfo);
 			return;
 		}
 
-		CliInteractivity tui = new();
-		emulator.Controller = tui;
-		emulator.Display.OnFrameProduced += tui.UpdateDisplay;
-		emulator.Run(cancellation.Token);
-		tui.ProcessInput();
-
-		// TODO: Figure out why arguments.Interactive is never resolved as true
-		/* if (arguments.Interactive)
+		if (options.Interactive)
 		{
 			CliInteractivity tui = new();
 			emulator.Controller = tui;
@@ -37,7 +30,7 @@ public class Program
 			Console.WriteLine("Running in headless mode");
 			Console.WriteLine("Press any key to exit...");
 			Console.ReadKey(true);
-		} */
+		}
 
 		cancellation.Cancel();
 	}

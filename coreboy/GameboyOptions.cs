@@ -4,31 +4,41 @@ namespace coreboy;
 
 public class GameboyOptions
 {
-	public FileInfo? RomFile => string.IsNullOrWhiteSpace(Rom) ? null : new FileInfo(Rom);
+	public FileInfo? RomFile
+	{
+		get
+		{
+			if (string.IsNullOrWhiteSpace(Rom))
+			{
+				return null;
+			}
+			return new FileInfo(Rom);
+		}
+	}
 
-	[Option('r', "rom", Required = false, HelpText = "Rom file.")]
+	[Option('r', "rom")]
 	public string Rom { get; set; } = string.Empty;
 
-	[Option('d', "force-dmg", Required = false, HelpText = "ForceDmg.")]
+	[Option('d', "force-dmg")]
 	public bool ForceDmg { get; set; }
 
-	[Option('c', "force-gbc", Required = false, HelpText = "ForceGbc.")]
+	[Option('c', "force-gbc")]
 	public bool ForceGbc { get; set; }
 
-	[Option('b', "use-bootstrap", Required = false, HelpText = "UseBootstrap.")]
+	[Option('b', "use-bootstrap")]
 	public bool UseBootstrap { get; set; }
 
-	[Option("disable-battery-saves", Required = false, HelpText = "disable-battery-saves.")]
-	public bool DisableBatterySaves { get; set; }
+	[Option('i', "interactive")]
+	public bool Interactive { get; set; }
 
-	[Option("debug", Required = false, HelpText = "Debug.")]
-	public bool Debug { get; set; }
-
-	[Option("headless", Required = false, HelpText = "headless.")]
+	[Option("headless")]
 	public bool Headless { get; set; }
 
-	[Option("interactive", Required = false, HelpText = "Play on the console!")]
-	public bool Interactive { get; set; }
+	[Option("disable-battery-saves")]
+	public bool DisableBatterySaves { get; set; }
+
+	[Option("debug")]
+	public bool Debug { get; set; }
 
 	public bool ShowUi => !Headless;
 
@@ -36,76 +46,52 @@ public class GameboyOptions
 
 	public bool RomSpecified => !string.IsNullOrWhiteSpace(Rom);
 
-	public GameboyOptions()
-	{
-	}
-
-	public GameboyOptions(FileInfo romFile) : this(romFile, new string[0], new string[0])
-	{
-	}
-
-	public GameboyOptions(FileInfo romFile, ICollection<string> longParameters, ICollection<string> shortParams)
-	{
-		Rom = romFile.FullName;
-		ForceDmg = longParameters.Contains("force-dmg") || shortParams.Contains("d");
-		ForceGbc = longParameters.Contains("force-gbc") || shortParams.Contains("c");
-
-
-		UseBootstrap = longParameters.Contains("use-bootstrap") || shortParams.Contains("b");
-		DisableBatterySaves = longParameters.Contains("disable-battery-saves") || shortParams.Contains("db");
-		Debug = longParameters.Contains("debug");
-		Headless = longParameters.Contains("headless");
-
-		Verify();
-	}
-
-	public void Verify()
-	{
-		if (ForceDmg && ForceGbc)
-		{
-			throw new ArgumentException("force-dmg and force-gbc options are can't be used together");
-		}
-	}
-
 	public const string UsageInfo =
 		"""
 		Usage:
 		coreboy.cli.exe path\to\rom.gb --option
 		
 		Available options:
-		    -d, --force-dmg                Use DMG mode
-		    -c, --force-gbc                Use GBC mode
-		    -b, --use-bootstrap            Start with the GB bootstrap
-		        --disable-battery-saves    Disable battery saves
-		        --debug                    Enable debug console
-		        --headless                 Start in headless mode
-		        --interactive              Play in the terminal
+		    -d, --force-dmg              Use DMG mode
+		    -c, --force-gbc              Use GBC mode
+		    -b, --use-bootstrap          Start with the GB bootstrap
+		    -i, --interactive            Play in the terminal
+		        --headless               Start in headless mode
+		        --disable-battery-saves  Disable battery saves
+		        --debug                  Enable debug console
 		""";
+
+	public GameboyOptions()
+	{
+	}
+
+	public void Verify()
+	{
+		if (ForceDmg && ForceGbc)
+		{
+			throw new ArgumentException(
+				"force-dmg and force-gbc options are can't be used together");
+		}
+	}
 
 	public static GameboyOptions Parse(string[] args)
 	{
-		var parser = new Parser(cfg =>
-		{
-			cfg.AutoHelp = true;
-			cfg.HelpWriter = Console.Out;
-		});
+		var result = Parser.Default.ParseArguments<GameboyOptions>(args)
+			.WithParsed(opts => { opts.Verify(); });
 
-		var result = parser.ParseArguments<GameboyOptions>(args)
-			.WithParsed(o => { o.Verify(); });
-
-
-		if (result is Parsed<GameboyOptions> parsed)
-		{
-			if (args.Length == 1 && args[0].Contains(".gb"))
-			{
-				parsed.Value.Rom = args[0];
-			}
-
-			return parsed.Value;
-		}
-		else
+		if (result is not Parsed<GameboyOptions> parsed)
 		{
 			throw new Exception("Failed to parse options");
 		}
+
+		if (args.Length == 1)
+		{
+			if (Path.GetExtension(args[0]) is ".gb" or ".gbc")
+			{
+				parsed.Value.Rom = args[0];
+			}
+		}
+
+		return parsed.Value;
 	}
 }
