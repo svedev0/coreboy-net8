@@ -124,3 +124,5 @@ _NCrunch*
 .vs/
 .vscode/
 .idea/
+
+*.sav.json
