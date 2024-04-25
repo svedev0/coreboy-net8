@@ -1,14 +1,16 @@
-namespace coreboy.serial;
-
-public interface ISerialEndpoint
+namespace coreboy.serial
 {
-	int Transfer(int outgoing);
-}
+    public interface SerialEndpoint
+    {
+        int transfer(int outgoing);
+    }
 
-public class NullSerialEndpoint : ISerialEndpoint
-{
-	public int Transfer(int outgoing)
-	{
-		return 0;
-	}
+
+    public class NullSerialEndpoint : SerialEndpoint
+    {
+        public int transfer(int outgoing)
+        {
+            return 0;
+        }
+    }
 }
