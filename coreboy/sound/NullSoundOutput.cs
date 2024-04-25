@@ -1,19 +1,17 @@
-namespace coreboy.sound;
-
-public class NullSoundOutput : ISoundOutput
+namespace coreboy.sound
 {
-    public void Start()
+    public class NullSoundOutput : ISoundOutput
     {
-        // TODO: Implement
-    }
+        public void Start()
+        {
+        }
 
-    public void Stop()
-    {
-        // TODO: Implement
-    }
+        public void Stop()
+        {
+        }
 
-    public void Play(int left, int right)
-    {
-        // TODO: Implement
+        public void Play(int left, int right)
+        {
+        }
     }
 }
