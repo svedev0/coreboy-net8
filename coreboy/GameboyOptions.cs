@@ -37,11 +37,6 @@ public class GameboyOptions
 	[Option("disable-battery-saves")]
 	public bool DisableBatterySaves { get; set; }
 
-	[Option("debug")]
-	public bool Debug { get; set; }
-
-	public bool ShowUi => !Headless;
-
 	public bool IsSupportBatterySaves() => !DisableBatterySaves;
 
 	public bool RomSpecified => !string.IsNullOrWhiteSpace(Rom);
@@ -58,7 +53,6 @@ public class GameboyOptions
 		    -i, --interactive            Play in the terminal
 		        --headless               Start in headless mode
 		        --disable-battery-saves  Disable battery saves
-		        --debug                  Enable debug console
 		""";
 
 	public GameboyOptions()
