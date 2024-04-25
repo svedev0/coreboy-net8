@@ -32,7 +32,7 @@ namespace coreboy.cpu
         public State State { get; private set; } = State.OPCODE;
 
         private readonly IAddressSpace _addressSpace;
-        private readonly InterruptManager _intManager;
+        private readonly InterruptManager _interruptManager;
         private readonly Gpu _gpu;
         private readonly IDisplay _display;
         private readonly SpeedMode _speedMode;
@@ -60,7 +60,7 @@ namespace coreboy.cpu
             _opcodes = new Opcodes();
             Registers = new Registers();
             _addressSpace = addressSpace;
-            _intManager = interruptManager;
+            _interruptManager = interruptManager;
             _gpu = gpu;
             _display = display;
             _speedMode = speedMode;
@@ -82,7 +82,7 @@ namespace coreboy.cpu
 
             if (State == State.OPCODE || State == State.HALTED || State == State.STOPPED)
             {
-                if (_intManager.IsIme() && _intManager.IsInterruptRequested())
+                if (_interruptManager.IsIme() && _interruptManager.IsInterruptRequested())
                 {
                     if (State == State.STOPPED)
                     {
@@ -102,7 +102,7 @@ namespace coreboy.cpu
                 case State.IRQ_JUMP:
                     HandleInterrupt();
                     return;
-                case State.HALTED when _intManager.IsInterruptRequested():
+                case State.HALTED when _interruptManager.IsInterruptRequested():
                     State = State.OPCODE;
                     break;
             }
@@ -206,7 +206,7 @@ namespace coreboy.cpu
                         }
                         else if (_opcode1 == 0x76)
                         {
-                            if (_intManager.IsHaltBug())
+                            if (_interruptManager.IsHaltBug())
                             {
                                 State = State.OPCODE;
                                 _haltBugMode = true;
@@ -237,7 +237,7 @@ namespace coreboy.cpu
                             }
                             
                             _opContext = op.Execute(Registers, _addressSpace, _operand, _opContext);
-                            op.SwitchInterrupts(_intManager);
+                            op.SwitchInterrupts(_interruptManager);
 
                             if (!op.Proceed(Registers))
                             {
@@ -260,7 +260,7 @@ namespace coreboy.cpu
                         {
                             State = State.OPCODE;
                             _operandIndex = 0;
-                            _intManager.OnInstructionFinished();
+                            _interruptManager.OnInstructionFinished();
                             return;
                         }
 
@@ -301,8 +301,8 @@ namespace coreboy.cpu
                     else
                     {
                         State = State.IRQ_PUSH_1;
-                        _intManager.ClearInterrupt(_requestedIrq);
-                        _intManager.DisableInterrupts(false);
+                        _interruptManager.ClearInterrupt(_requestedIrq);
+                        _interruptManager.DisableInterrupts(false);
                     }
 
                     break;

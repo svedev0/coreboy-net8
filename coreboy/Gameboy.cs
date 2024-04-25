@@ -12,162 +12,161 @@ namespace coreboy;
 
 public class Gameboy : IRunnable
 {
-    public static readonly int TicksPerSec = 4_194_304;
+	public static readonly int TicksPerSec = 4_194_304;
 
-    public Mmu Mmu { get; }
-    public Cpu Cpu { get; }
-    public SpeedMode SpeedMode { get; }
+	public Mmu Mmu { get; }
+	public Cpu Cpu { get; }
+	public SpeedMode SpeedMode { get; }
 
-    public bool Pause { get; set; }
+	public bool Pause { get; set; }
 
-    private readonly Gpu _gpu;
-    private readonly Timer _timer;
-    private readonly Dma _dma;
-    private readonly Hdma _hdma;
-    private readonly IDisplay _display;
-    private readonly Sound _sound;
-    private readonly SerialPort _serialPort;
+	private readonly Gpu _gpu;
+	private readonly Timer _timer;
+	private readonly Dma _dma;
+	private readonly Hdma _hdma;
+	private readonly IDisplay _display;
+	private readonly Sound _sound;
+	private readonly SerialPort _serialPort;
 
-    private readonly bool _gbc;
+	private readonly bool _gbc;
 
-    public Gameboy(
-        GameboyOptions options, 
-        Cartridge rom, 
-        IDisplay display, 
-        IController controller,
-        ISoundOutput soundOutput,
-        SerialEndpoint serialEndpoint)
-    {
-        InterruptManager interruptManager = new(_gbc);
-        Ram oamRam = new(0xfe00, 0x00a0);
+	public Gameboy(
+		GameboyOptions options,
+		Cartridge rom,
+		IDisplay display,
+		IController controller,
+		ISoundOutput soundOutput,
+		SerialEndpoint serialEndpoint)
+	{
+		_display = display;
+		_gbc = rom.Gbc;
+		SpeedMode = new SpeedMode();
 
-        Mmu = new();
-        SpeedMode = new();
+		var interruptManager = new InterruptManager(_gbc);
 
-        _timer = new(interruptManager, SpeedMode);
-        _dma = new(Mmu, oamRam, SpeedMode);
-        _gpu = new(display, interruptManager, _dma, oamRam, _gbc);
-        _hdma = new(Mmu);
-        _display = display;
-        _sound = new(soundOutput, _gbc);
-        _serialPort = new(interruptManager, serialEndpoint, SpeedMode);
-        _gbc = rom.Gbc;
+		_timer = new Timer(interruptManager, SpeedMode);
+		Mmu = new Mmu();
 
-        Mmu.AddAddressSpace(rom);
-        Mmu.AddAddressSpace(_gpu);
-        Mmu.AddAddressSpace(new Joypad(interruptManager, controller));
-        Mmu.AddAddressSpace(interruptManager);
-        Mmu.AddAddressSpace(_serialPort);
-        Mmu.AddAddressSpace(_timer);
-        Mmu.AddAddressSpace(_dma);
-        Mmu.AddAddressSpace(_sound);
+		var oamRam = new Ram(0xfe00, 0x00a0);
 
-        Mmu.AddAddressSpace(new Ram(0xc000, 0x1000));
-        
-        if (_gbc)
-        {
-            Mmu.AddAddressSpace(SpeedMode);
-            Mmu.AddAddressSpace(_hdma);
-            Mmu.AddAddressSpace(new GbcRam());
-            Mmu.AddAddressSpace(new UndocumentedGbcRegisters());
-        }
-        else
-        {
-            Mmu.AddAddressSpace(new Ram(0xd000, 0x1000));
-        }
+		_dma = new Dma(Mmu, oamRam, SpeedMode);
+		_gpu = new Gpu(display, interruptManager, _dma, oamRam, _gbc);
+		_hdma = new Hdma(Mmu);
+		_sound = new Sound(soundOutput, _gbc);
+		_serialPort = new SerialPort(interruptManager, serialEndpoint, SpeedMode);
 
-        Mmu.AddAddressSpace(new Ram(0xff80, 0x7f));
-        Mmu.AddAddressSpace(new ShadowAddressSpace(Mmu, 0xe000, 0xc000, 0x1e00));
+		Mmu.AddAddressSpace(rom);
+		Mmu.AddAddressSpace(_gpu);
+		Mmu.AddAddressSpace(new Joypad(interruptManager, controller));
+		Mmu.AddAddressSpace(interruptManager);
+		Mmu.AddAddressSpace(_serialPort);
+		Mmu.AddAddressSpace(_timer);
+		Mmu.AddAddressSpace(_dma);
+		Mmu.AddAddressSpace(_sound);
 
-        Cpu = new(Mmu, interruptManager, _gpu, display, SpeedMode);
+		Mmu.AddAddressSpace(new Ram(0xc000, 0x1000));
+		if (_gbc)
+		{
+			Mmu.AddAddressSpace(SpeedMode);
+			Mmu.AddAddressSpace(_hdma);
+			Mmu.AddAddressSpace(new GbcRam());
+			Mmu.AddAddressSpace(new UndocumentedGbcRegisters());
+		}
+		else
+		{
+			Mmu.AddAddressSpace(new Ram(0xd000, 0x1000));
+		}
 
-        interruptManager.DisableInterrupts(false);
-        
-        if (!options.UseBootstrap)
-        {
-            InitialiseRegisters();
-        }
-    }
+		Mmu.AddAddressSpace(new Ram(0xff80, 0x7f));
+		Mmu.AddAddressSpace(new ShadowAddressSpace(Mmu, 0xe000, 0xc000, 0x1e00));
 
-    private void InitialiseRegisters()
-    {
-        var registers = Cpu.Registers;
+		Cpu = new Cpu(Mmu, interruptManager, _gpu, display, SpeedMode);
 
-        registers.SetAf(0x01b0);
-        if (_gbc)
-        {
-            registers.A = 0x11;
-        }
+		interruptManager.DisableInterrupts(false);
 
-        registers.SetBc(0x0013);
-        registers.SetDe(0x00d8);
-        registers.SetHl(0x014d);
-        registers.SP = 0xfffe;
-        registers.PC = 0x0100;
-    }
+		if (!options.UseBootstrap)
+		{
+			InitiliseRegisters();
+		}
+	}
 
-    public void Run(CancellationToken token)
-    {
-        var lcdRefreshRequested = false;
-        var lcdDisabled = false;
-        
-        while (!token.IsCancellationRequested)
-        {
-            if (Pause)
-            {
-                Task.Delay(1000, token).Wait(token);
-                continue;
-            }
+	private void InitiliseRegisters()
+	{
+		var registers = Cpu.Registers;
 
-            Gpu.Mode? newGpuMode = Tick();
+		registers.SetAf(0x01b0);
+		if (_gbc)
+		{
+			registers.A = 0x11;
+		}
 
-            if (newGpuMode.HasValue)
-            {
-                _hdma.OnGpuUpdate(newGpuMode.Value);
-            }
+		registers.SetBc(0x0013);
+		registers.SetDe(0x00d8);
+		registers.SetHl(0x014d);
+		registers.SP = 0xfffe;
+		registers.PC = 0x0100;
+	}
 
-            if (!lcdDisabled && !_gpu.IsLcdEnabled())
-            {
-                lcdDisabled = true;
-                _display.RequestRefresh();
-                _hdma.OnLcdSwitch(false);
-            }
-            else if (newGpuMode == Gpu.Mode.VBlank)
-            {
-                lcdRefreshRequested = true;
-                _display.RequestRefresh();
-            }
+	public void Run(CancellationToken token)
+	{
+		var requestedScreenRefresh = false;
+		var lcdDisabled = false;
 
-            if (lcdDisabled && _gpu.IsLcdEnabled())
-            {
-                lcdDisabled = false;
-                _display.WaitForRefresh();
-                _hdma.OnLcdSwitch(true);
-            }
-            else if (lcdRefreshRequested && newGpuMode == Gpu.Mode.OamSearch)
-            {
-                lcdRefreshRequested = false;
-                _display.WaitForRefresh();
-            }
-        }
-    }
+		while (!token.IsCancellationRequested)
+		{
+			if (Pause)
+			{
+				Thread.Sleep(1000);
+				continue;
+			}
 
-    public Gpu.Mode? Tick()
-    {
-        _timer.Tick();
+			var newMode = Tick();
+			if (newMode.HasValue)
+			{
+				_hdma.OnGpuUpdate(newMode.Value);
+			}
 
-        if (_hdma.IsTransferInProgress())
-        {
-            _hdma.Tick();
-        }
-        else
-        {
-            Cpu.Tick();
-        }
+			if (!lcdDisabled && !_gpu.IsLcdEnabled())
+			{
+				lcdDisabled = true;
+				_display.RequestRefresh();
+				_hdma.OnLcdSwitch(false);
+			}
+			else if (newMode == Gpu.Mode.VBlank)
+			{
+				requestedScreenRefresh = true;
+				_display.RequestRefresh();
+			}
 
-        _dma.Tick();
-        _sound.Tick();
-        _serialPort.Tick();
-        return _gpu.Tick();
-    }
+			if (lcdDisabled && _gpu.IsLcdEnabled())
+			{
+				lcdDisabled = false;
+				_display.WaitForRefresh();
+				_hdma.OnLcdSwitch(true);
+			}
+			else if (requestedScreenRefresh && newMode == Gpu.Mode.OamSearch)
+			{
+				requestedScreenRefresh = false;
+				_display.WaitForRefresh();
+			}
+		}
+	}
+
+	public Gpu.Mode? Tick()
+	{
+		_timer.Tick();
+		if (_hdma.IsTransferInProgress())
+		{
+			_hdma.Tick();
+		}
+		else
+		{
+			Cpu.Tick();
+		}
+
+		_dma.Tick();
+		_sound.Tick();
+		_serialPort.Tick();
+		return _gpu.Tick();
+	}
 }

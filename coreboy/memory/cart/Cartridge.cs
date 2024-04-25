@@ -75,7 +75,7 @@ namespace coreboy.memory.cart
 
             _dmgBootstrap = options.UseBootstrap ? 0 : 1;
             
-            if (options.ForceGbc)
+            if (options.ForceCgb)
             {
                 Gbc = true;
                 return;

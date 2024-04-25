@@ -9,16 +9,17 @@ public class Program
     static void Main(string[] args)
     {
         CancellationTokenSource cancellation = new();
-        var options = GameboyOptions.Parse(args);
-        Emulator emulator = new(options);
+        var arguments = GameboyOptions.Parse(args);
+        Emulator emulator = new(arguments);
 
-        if (!options.RomSpecified)
+        if (!arguments.RomSpecified)
         {
-            Console.WriteLine(GameboyOptions.Usage);
+            GameboyOptions.PrintUsage(Console.Out);
+            Console.Out.Flush();
             Environment.Exit(1);
         }
 
-        if (options.Interactive)
+        if (arguments.Interactive)
         {
             CommandLineInteractivity ui = new();
             emulator.Controller = ui;
@@ -29,8 +30,8 @@ public class Program
         else
         {
             emulator.Run(cancellation.Token);
-            Console.WriteLine("Running in headless mode");
-            Console.WriteLine("Press any key to exit...");
+            Console.WriteLine("Running headless.");
+            Console.WriteLine("Press ANY key to exit.");
             Console.ReadKey(true);
         }
 
@@ -40,7 +41,7 @@ public class Program
 
 public class CommandLineInteractivity : IController
 {
-    private IButtonListener? _listener;
+    private IButtonListener _listener;
     private readonly Dictionary<ConsoleKey, Button> _controls;
 
     public CommandLineInteractivity()
@@ -49,7 +50,7 @@ public class CommandLineInteractivity : IController
         Console.SetCursorPosition(0, 0);
         Console.WindowHeight = 92;
 
-        _controls = new()
+        _controls = new Dictionary<ConsoleKey, Button>
         {
             {ConsoleKey.LeftArrow, Button.Left},
             {ConsoleKey.RightArrow, Button.Right},
@@ -66,33 +67,30 @@ public class CommandLineInteractivity : IController
 
     public void ProcessInput()
     {
-        Button? lastButton = null;
+        Button lastButton = null;
         var input = Console.ReadKey(true);
-        
         while (input.Key != ConsoleKey.Escape)
         {
-            if (!_controls.TryGetValue(input.Key, out var button))
+            var button = _controls.ContainsKey(input.Key) ? _controls[input.Key] : null;
+
+            if (button != null)
             {
-                input = Console.ReadKey(true);
-                continue;
+                if (lastButton != button)
+                {
+                    _listener?.OnButtonRelease(lastButton);
+                }
+
+                _listener?.OnButtonPress(button);
+
+                var snapshot = button;
+                new Thread(() =>
+                {
+                    Thread.Sleep(500);
+                    _listener?.OnButtonRelease(snapshot);
+                }).Start();
+
+                lastButton = button;
             }
-
-            if (lastButton != null && lastButton != button)
-            {
-                _listener?.OnButtonRelease(lastButton);
-            }
-
-            _listener?.OnButtonPress(button);
-
-            // TODO: Clean up this thread start
-            Button snapshot = button;
-            new Thread(() =>
-            {
-                Task.Delay(500).Wait();
-                _listener?.OnButtonRelease(snapshot);
-            }).Start();
-
-            lastButton = button;
 
             input = Console.ReadKey(true);
         }

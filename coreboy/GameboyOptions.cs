@@ -4,41 +4,31 @@ namespace coreboy;
 
 public class GameboyOptions
 {
-    [Option('r', "rom")]
-    public string Rom { get; set; } = string.Empty;
+    public FileInfo? RomFile => string.IsNullOrWhiteSpace(Rom) ? null : new FileInfo(Rom);
 
-    [Option('d', "force-dmg")]
+    [Option('r', "rom", Required = false, HelpText = "Rom file.")]
+    public string Rom { get; set; }
+
+    [Option('d', "force-dmg", Required = false, HelpText = "ForceDmg.")]
     public bool ForceDmg { get; set; }
 
-    [Option('c', "force-gbc")]
-    public bool ForceGbc { get; set; }
+    [Option('c', "force-cgb", Required = false, HelpText = "ForceCgb.")]
+    public bool ForceCgb { get; set; }
 
-    [Option('b', "use-bootstrap")]
+    [Option('b', "use-bootstrap", Required = false, HelpText = "UseBootstrap.")]
     public bool UseBootstrap { get; set; }
 
-    [Option("disable-battery-saves")]
+    [Option("disable-battery-saves", Required = false, HelpText = "disable-battery-saves.")]
     public bool DisableBatterySaves { get; set; }
 
-    [Option("debug")]
+    [Option("debug", Required = false, HelpText = "Debug.")]
     public bool Debug { get; set; }
 
-    [Option("headless")]
+    [Option("headless", Required = false, HelpText = "headless.")]
     public bool Headless { get; set; }
 
-    [Option("interactive")]
+    [Option("interactive", Required = false, HelpText = "Play on the console!")]
     public bool Interactive { get; set; }
-
-    public FileInfo? RomFile
-    {
-        get
-        {
-            if (!string.IsNullOrWhiteSpace(Rom))
-            {
-                return new FileInfo(Rom);
-            }
-            return null;
-        }
-    }
 
     public bool ShowUi => !Headless;
 
@@ -50,52 +40,52 @@ public class GameboyOptions
     {
     }
 
-    public GameboyOptions(FileInfo romFile) : this(romFile, [], [])
+    public GameboyOptions(FileInfo romFile) : this(romFile, new string[0], new string[0])
     {
     }
 
-    public GameboyOptions(
-        FileInfo romFile, List<string> longParams, List<string> shortParams)
+    public GameboyOptions(FileInfo romFile, ICollection<string> longParameters, ICollection<string> shortParams)
     {
         Rom = romFile.FullName;
-        ForceDmg = longParams.Contains("force-dmg") || shortParams.Contains("d");
-        ForceGbc = longParams.Contains("force-cgb") || shortParams.Contains("c");
+        ForceDmg = longParameters.Contains("force-dmg") || shortParams.Contains("d");
+        ForceCgb = longParameters.Contains("force-cgb") || shortParams.Contains("c");
 
-        UseBootstrap = longParams.Contains("use-bootstrap") || shortParams.Contains("b");
-        DisableBatterySaves = longParams.Contains("disable-battery-saves");
-        Debug = longParams.Contains("debug");
-        Headless = longParams.Contains("headless");
+
+        UseBootstrap = longParameters.Contains("use-bootstrap") || shortParams.Contains("b");
+        DisableBatterySaves = longParameters.Contains("disable-battery-saves") || shortParams.Contains("db");
+        Debug = longParameters.Contains("debug");
+        Headless = longParameters.Contains("headless");
 
         Verify();
     }
 
     public void Verify()
     {
-        if (ForceDmg && ForceGbc)
+        if (ForceDmg && ForceCgb)
         {
-            throw new ArgumentException(
-                "force-dmg and force-cgb options cannot be used simultaneously");
+            throw new ArgumentException("force-dmg and force-cgb options are can't be used together");
         }
     }
-
-    public const string Usage =
-        """
-        Usage:
-        .\coreboy.cli.exe 'path\to\rom.gb'
-
-        Available options:
-            -d, --force-dmg              Emulate DMG hardware
-            -c, --force-gbc              Emulate GBC hardware
-            -b, --use-bootstrap          Start with GB bootstrap
-                --disable-battery-saves  Disable battery saves
-                --debug                  Enable debug console
-                --headless               Start in headless mode
-                --interactive            Play in the terminal
-        """;
+    
+    public static void PrintUsage(TextWriter stream)
+    {
+        stream.WriteLine("Usage:");
+        stream.WriteLine("coreboy.cli.exe my-totally-not-pirate-rom-file.gb");
+        stream.WriteLine();
+        stream.WriteLine("Available options:");
+        stream.WriteLine("  -d  --force-dmg                Emulate classic GB (DMG) for universal ROMs");
+        stream.WriteLine("  -c  --force-cgb                Emulate color GB (CGB) for all ROMs");
+        stream.WriteLine("  -b  --use-bootstrap            Start with the GB bootstrap");
+        stream.WriteLine("      --disable-battery-saves    Disable battery saves");
+        stream.WriteLine("      --debug                    Enable debug console");
+        stream.WriteLine("      --headless                 Start in the headless mode");
+        stream.WriteLine("      --interactive              Play on the console!");
+        stream.Flush();
+    }
 
     public static GameboyOptions Parse(string[] args)
     {
-        Parser parser = new(cfg =>
+        var parser = new Parser(cfg =>
         {
             cfg.AutoHelp = true;
             cfg.HelpWriter = Console.Out;
@@ -104,23 +94,20 @@ public class GameboyOptions
         var result = parser.ParseArguments<GameboyOptions>(args)
             .WithParsed(o => { o.Verify(); });
 
-        if (result is not Parsed<GameboyOptions> parsed)
-        {
-            throw new ArgumentException("Invalid argument(s)");
-        }
 
-        if (args.Length != 1)
+        if (result is Parsed<GameboyOptions> parsed)
         {
+            if (args.Length == 1 && args[0].Contains(".gb"))
+            {
+                parsed.Value.Rom = args[0];
+            }
+
             return parsed.Value;
         }
-
-        string extension = Path.GetExtension(args[0]);
-        
-        if (extension == ".gb" || extension == ".gbc")
+        else
         {
-            parsed.Value.Rom = args[0];
+            Console.WriteLine("Failed to parsed!");
+            return null;
         }
-
-        return parsed.Value;
     }
 }
