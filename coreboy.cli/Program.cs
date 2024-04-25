@@ -12,8 +12,7 @@ public class Program
 
 		if (!arguments.RomSpecified)
 		{
-			GameboyOptions.PrintUsage(Console.Out);
-			Console.Out.Flush();
+			Console.WriteLine(GameboyOptions.UsageInfo);
 			return;
 		}
 

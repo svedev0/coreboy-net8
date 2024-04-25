@@ -67,21 +67,20 @@ public class GameboyOptions
 		}
 	}
 
-	public static void PrintUsage(TextWriter stream)
-	{
-		stream.WriteLine("Usage:");
-		stream.WriteLine("coreboy.cli.exe my-totally-not-pirate-rom-file.gb");
-		stream.WriteLine();
-		stream.WriteLine("Available options:");
-		stream.WriteLine("  -d  --force-dmg                Emulate classic GB (DMG) for universal ROMs");
-		stream.WriteLine("  -c  --force-cgb                Emulate color GB (CGB) for all ROMs");
-		stream.WriteLine("  -b  --use-bootstrap            Start with the GB bootstrap");
-		stream.WriteLine("      --disable-battery-saves    Disable battery saves");
-		stream.WriteLine("      --debug                    Enable debug console");
-		stream.WriteLine("      --headless                 Start in the headless mode");
-		stream.WriteLine("      --interactive              Play on the console!");
-		stream.Flush();
-	}
+	public const string UsageInfo =
+		"""
+		Usage:
+		coreboy.cli.exe path\to\rom.gb --option
+		
+		Available options:
+		    -d, --force-dmg                Use DMG mode
+		    -c, --force-cgb                Use GBC mode
+		    -b, --use-bootstrap            Start with the GB bootstrap
+		        --disable-battery-saves    Disable battery saves
+		        --debug                    Enable debug console
+		        --headless                 Start in headless mode
+		        --interactive              Play in the terminal
+		""";
 
 	public static GameboyOptions Parse(string[] args)
 	{
