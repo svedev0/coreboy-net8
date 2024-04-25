@@ -1,55 +1,54 @@
-using System;
-using System.Collections.Generic;
+#nullable disable
 
 namespace coreboy.debugging
 {
-    public class CommandPattern
-    {
+	public class CommandPattern
+	{
 
-        private readonly List<string> _commandNames;
+		private readonly List<string> _commandNames;
 
-        private readonly List<CommandArgument> _arguments;
+		private readonly List<CommandArgument> _arguments;
 
-        private readonly string _description;
+		private readonly string _description;
 
-        private CommandPattern(Builder builder)
-        {
-            _commandNames = builder.CommandNames;
-            _arguments = builder.Arguments;
-            _description = builder.Description;
-        }
+		private CommandPattern(Builder builder)
+		{
+			_commandNames = builder.CommandNames;
+			_arguments = builder.Arguments;
+			_description = builder.Description;
+		}
 
-        public bool Matches(string commandLine)
-        {
-            throw new NotImplementedException();
-            /*
+		public bool Matches(string commandLine)
+		{
+			throw new NotImplementedException();
+			/*
             return commandNames.Where(commandLine.StartsWith)
                     .stream()
                     .filter(commandLine::startsWith)
                     .map(String::length)
                     .map(commandLine::substring)
                     .anyMatch(s -> s.isEmpty() || s.charAt(0) == ' ');*/
-        }
+		}
 
-        public List<string> GetCommandNames()
-        {
-            return _commandNames;
-        }
+		public List<string> GetCommandNames()
+		{
+			return _commandNames;
+		}
 
-        public List<CommandArgument> GetArguments()
-        {
-            return _arguments;
-        }
+		public List<CommandArgument> GetArguments()
+		{
+			return _arguments;
+		}
 
-        public string GetDescription()
-        {
-            return _description;
-        }
+		public string GetDescription()
+		{
+			return _description;
+		}
 
-        public ParsedCommandLine Parse(string commandLine)
-        {
-            throw new NotImplementedException();
-            /*
+		public ParsedCommandLine Parse(string commandLine)
+		{
+			throw new NotImplementedException();
+			/*
             String commandName = commandNames
                     .stream()
                     .filter(commandLine::startsWith)
@@ -81,12 +80,12 @@ namespace coreboy.debugging
                 remaining = split.subList(i, split.size());
             }
             return new ParsedCommandLine(map, remaining);*/
-        }
+		}
 
-        private static List<string> Split(string str)
-        {
-            throw new NotImplementedException();
-            /*
+		private static List<string> Split(string str)
+		{
+			throw new NotImplementedException();
+			/*
             List<String> split = new List<>();
             bool isEscaped = false;
             StringBuilder currentArg = new StringBuilder();
@@ -133,101 +132,101 @@ namespace coreboy.debugging
                 }
             }
             return split;*/
-        }
+		}
 
-        public override string ToString() => $"CommandPattern[{_commandNames}]";
+		public override string ToString() => $"CommandPattern[{_commandNames}]";
 
-        public class ParsedCommandLine
-        {
+		public class ParsedCommandLine
+		{
 
-            private readonly Dictionary<string, string> _argumentMap;
-            private readonly List<string> _remainingArguments;
+			private readonly Dictionary<string, string> _argumentMap;
+			private readonly List<string> _remainingArguments;
 
-            private ParsedCommandLine(Dictionary<string, string> argumentMap, List<string> remainingArguments)
-            {
-                _argumentMap = argumentMap;
-                _remainingArguments = remainingArguments;
-            }
+			private ParsedCommandLine(Dictionary<string, string> argumentMap, List<string> remainingArguments)
+			{
+				_argumentMap = argumentMap;
+				_remainingArguments = remainingArguments;
+			}
 
-            public string GetArgument(string name)
-            {
-                return _argumentMap[name];
-            }
+			public string GetArgument(string name)
+			{
+				return _argumentMap[name];
+			}
 
-            public List<string> GetRemainingArguments()
-            {
-                return _remainingArguments;
-            }
-        }
+			public List<string> GetRemainingArguments()
+			{
+				return _remainingArguments;
+			}
+		}
 
-        public class Builder
-        {
-            internal readonly List<string> CommandNames;
-            internal readonly List<CommandArgument> Arguments;
-            internal string Description;
+		public class Builder
+		{
+			internal readonly List<string> CommandNames;
+			internal readonly List<CommandArgument> Arguments;
+			internal string Description;
 
-            private Builder(string[] commandNames)
-            {
-                CommandNames = new List<string>(commandNames);
-                Arguments = new List<CommandArgument>();
-            }
-            public static Builder Create(string longName)
-            {
-                return new Builder(new[] {longName});
-            }
+			private Builder(string[] commandNames)
+			{
+				CommandNames = new List<string>(commandNames);
+				Arguments = new List<CommandArgument>();
+			}
+			public static Builder Create(string longName)
+			{
+				return new Builder(new[] { longName });
+			}
 
-            public static Builder Create(string longName, string shortName)
-            {
-                return new Builder(new[] {longName, shortName});
-            }
+			public static Builder Create(string longName, string shortName)
+			{
+				return new Builder(new[] { longName, shortName });
+			}
 
-            public Builder WithOptionalArgument(string name)
-            {
-                AssertNoOptionalLastArgument();
-                Arguments.Add(new CommandArgument(name, false));
-                return this;
-            }
+			public Builder WithOptionalArgument(string name)
+			{
+				AssertNoOptionalLastArgument();
+				Arguments.Add(new CommandArgument(name, false));
+				return this;
+			}
 
-            public Builder WithRequiredArgument(string name)
-            {
-                AssertNoOptionalLastArgument();
-                Arguments.Add(new CommandArgument(name, true));
-                return this;
-            }
+			public Builder WithRequiredArgument(string name)
+			{
+				AssertNoOptionalLastArgument();
+				Arguments.Add(new CommandArgument(name, true));
+				return this;
+			}
 
-            public Builder WithOptionalValue(string name, string[] values)
-            {
-                AssertNoOptionalLastArgument();
-                Arguments.Add(new CommandArgument(name, false, new List<string>(values)));
-                return this;
-            }
+			public Builder WithOptionalValue(string name, string[] values)
+			{
+				AssertNoOptionalLastArgument();
+				Arguments.Add(new CommandArgument(name, false, new List<string>(values)));
+				return this;
+			}
 
-            public Builder WithRequiredValue(string name, string[] values)
-            {
-                AssertNoOptionalLastArgument();
-                Arguments.Add(new CommandArgument(name, true, new List<string>(values)));
-                return this;
-            }
+			public Builder WithRequiredValue(string name, string[] values)
+			{
+				AssertNoOptionalLastArgument();
+				Arguments.Add(new CommandArgument(name, true, new List<string>(values)));
+				return this;
+			}
 
-            public Builder WithDescription(string desc)
-            {
-                Description = desc;
-                return this;
-            }
+			public Builder WithDescription(string desc)
+			{
+				Description = desc;
+				return this;
+			}
 
-            private void AssertNoOptionalLastArgument()
-            {
-                if (Arguments.Count > 0 && !Arguments[^1].IsRequired())
-                {
-                    throw new InvalidOperationException("Can't add argument after the optional one");
-                }
-            }
+			private void AssertNoOptionalLastArgument()
+			{
+				if (Arguments.Count > 0 && !Arguments[^1].IsRequired())
+				{
+					throw new InvalidOperationException("Can't add argument after the optional one");
+				}
+			}
 
-            public CommandPattern Build()
-            {
-                return new CommandPattern(this);
-            }
-        }
+			public CommandPattern Build()
+			{
+				return new CommandPattern(this);
+			}
+		}
 
-    }
+	}
 }
