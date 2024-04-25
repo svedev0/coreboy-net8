@@ -15,8 +15,8 @@ namespace coreboy.memory.cart
 		public enum GameboyTypeFlag
 		{
 			UNIVERSAL = 0x80,
-			CGB = 0xc0,
-			NON_CGB = 0
+			GBC = 0xc0,
+			NON_GBC = 0
 		}
 
 		private readonly IAddressSpace _addressSpace;
@@ -75,7 +75,7 @@ namespace coreboy.memory.cart
 
 			_dmgBootstrap = options.UseBootstrap ? 0 : 1;
 
-			if (options.ForceCgb)
+			if (options.ForceGbc)
 			{
 				Gbc = true;
 				return;
@@ -83,10 +83,10 @@ namespace coreboy.memory.cart
 
 			switch (gameboyType)
 			{
-				case GameboyTypeFlag.NON_CGB:
+				case GameboyTypeFlag.NON_GBC:
 					Gbc = false;
 					break;
-				case GameboyTypeFlag.CGB:
+				case GameboyTypeFlag.GBC:
 					Gbc = true;
 					break;
 				default:
@@ -193,8 +193,8 @@ namespace coreboy.memory.cart
 			return value switch
 			{
 				0x80 => GameboyTypeFlag.UNIVERSAL,
-				0xc0 => GameboyTypeFlag.CGB,
-				_ => GameboyTypeFlag.NON_CGB
+				0xc0 => GameboyTypeFlag.GBC,
+				_ => GameboyTypeFlag.NON_GBC
 			};
 		}
 	}

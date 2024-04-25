@@ -12,8 +12,8 @@ public class GameboyOptions
 	[Option('d', "force-dmg", Required = false, HelpText = "ForceDmg.")]
 	public bool ForceDmg { get; set; }
 
-	[Option('c', "force-cgb", Required = false, HelpText = "ForceCgb.")]
-	public bool ForceCgb { get; set; }
+	[Option('c', "force-gbc", Required = false, HelpText = "ForceGbc.")]
+	public bool ForceGbc { get; set; }
 
 	[Option('b', "use-bootstrap", Required = false, HelpText = "UseBootstrap.")]
 	public bool UseBootstrap { get; set; }
@@ -48,7 +48,7 @@ public class GameboyOptions
 	{
 		Rom = romFile.FullName;
 		ForceDmg = longParameters.Contains("force-dmg") || shortParams.Contains("d");
-		ForceCgb = longParameters.Contains("force-cgb") || shortParams.Contains("c");
+		ForceGbc = longParameters.Contains("force-gbc") || shortParams.Contains("c");
 
 
 		UseBootstrap = longParameters.Contains("use-bootstrap") || shortParams.Contains("b");
@@ -61,9 +61,9 @@ public class GameboyOptions
 
 	public void Verify()
 	{
-		if (ForceDmg && ForceCgb)
+		if (ForceDmg && ForceGbc)
 		{
-			throw new ArgumentException("force-dmg and force-cgb options are can't be used together");
+			throw new ArgumentException("force-dmg and force-gbc options are can't be used together");
 		}
 	}
 
@@ -74,7 +74,7 @@ public class GameboyOptions
 		
 		Available options:
 		    -d, --force-dmg                Use DMG mode
-		    -c, --force-cgb                Use GBC mode
+		    -c, --force-gbc                Use GBC mode
 		    -b, --use-bootstrap            Start with the GB bootstrap
 		        --disable-battery-saves    Disable battery saves
 		        --debug                    Enable debug console
