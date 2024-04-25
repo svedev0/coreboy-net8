@@ -6,157 +6,196 @@ namespace coreboy.win;
 
 public partial class EmulatorSurface : Form, IController
 {
-    private IButtonListener? _listener;
+	private IButtonListener _listener = null!;
 
-    private readonly MenuStrip _menu;
-    private readonly PictureBox _pictureBox;
-    private readonly Dictionary<Keys, Button> _controls;
+	private byte[] _lastFrame = [];
+	private readonly MenuStrip _menu;
+	private readonly PictureBox _pictureBox;
+	private readonly Dictionary<Keys, Button> _controls;
 
-    private readonly Emulator _emulator;
-    private readonly GameboyOptions _gameboyOptions;
-    private CancellationTokenSource _cancellation;
+	private readonly Emulator _emulator;
+	private readonly GameboyOptions _gameboyOptions;
+	private CancellationTokenSource _cancellation;
 
-    private readonly object _updateLock = new();
+	private readonly object _updateLock = new();
 
-    public EmulatorSurface()
-    {
-        InitializeComponent();
+	public EmulatorSurface()
+	{
+		InitializeComponent();
 
-        _cancellation = new();
-        _gameboyOptions = new();
-        _emulator = new(_gameboyOptions);
+		Controls.Add(_menu = new MenuStrip
+		{
+			Items =
+			{
+				new ToolStripMenuItem("Emulator")
+				{
+					DropDownItems =
+					{
+						new ToolStripMenuItem("Load ROM", null, (sender, args) => { StartEmulation(); }),
+						new ToolStripMenuItem("Pause", null, (sender, args) => { _emulator?.TogglePause(); }),
+						new ToolStripMenuItem("Quit", null, (sender, args) => { Close(); })
+					}
+				},
+				new ToolStripMenuItem("Graphics")
+				{
+					DropDownItems =
+					{
+						new ToolStripMenuItem("Screenshot", null, (sender, args) => { Screenshot(); })
+					}
+				}
+			}
+		});
 
-        Controls.Add(_menu = new MenuStrip
-        {
-            Items =
-            {
-                new ToolStripMenuItem("Emulator")
-                {
-                    DropDownItems =
-                    {
-                        new ToolStripMenuItem("Load ROM", null, (sender, args) => { StartEmulator(); }),
-                        new ToolStripMenuItem("Pause", null, (sender, args) => { _emulator.TogglePause(); }),
-                        new ToolStripMenuItem("Quit", null, (sender, args) => { Close(); })
-                    }
-                }
-            }
-        });
+		Controls.Add(_pictureBox = new PictureBox
+		{
+			Top = _menu.Height,
+			Left = 0,
+			Width = BitmapDisplay.DisplayWidth * 5,
+			Height = BitmapDisplay.DisplayHeight * 5,
+			BackColor = Color.Black,
+			SizeMode = PictureBoxSizeMode.Zoom
+		});
 
-        Controls.Add(_pictureBox = new PictureBox
-        {
-            Top = _menu.Height,
-            Width = BitmapDisplay.DisplayWidth * 5,
-            Height = BitmapDisplay.DisplayHeight * 5,
-            BackColor = Color.Black,
-            SizeMode = PictureBoxSizeMode.Zoom
-        });
+		_controls = new Dictionary<Keys, Button>
+		{
+			{Keys.Left, Button.Left},
+			{Keys.Right, Button.Right},
+			{Keys.Up, Button.Up},
+			{Keys.Down, Button.Down},
+			{Keys.Z, Button.A},
+			{Keys.X, Button.B},
+			{Keys.Enter, Button.Start},
+			{Keys.Back, Button.Select}
+		};
 
-        _controls = new Dictionary<Keys, Button>
-        {
-            {Keys.Left, Button.Left},
-            {Keys.Right, Button.Right},
-            {Keys.Up, Button.Up},
-            {Keys.Down, Button.Down},
-            {Keys.Z, Button.A},
-            {Keys.X, Button.B},
-            {Keys.Enter, Button.Start},
-            {Keys.Back, Button.Select}
-        };
+		Height = _menu.Height + _pictureBox.Height + 50;
+		Width = _pictureBox.Width;
 
-        Height = _menu.Height + _pictureBox.Height + 50;
-        Width = _pictureBox.Width;
+		_cancellation = new CancellationTokenSource();
+		_gameboyOptions = new GameboyOptions();
+		_emulator = new Emulator(_gameboyOptions);
 
-        ConnectEmulatorToPanel();
-    }
+		ConnectEmulatorToPanel();
+	}
 
-    private void ConnectEmulatorToPanel()
-    {
-        _emulator.Controller = this;
-        _emulator.Display.OnFrameProduced += UpdateDisplay;
+	private void ConnectEmulatorToPanel()
+	{
+		_emulator.Controller = this;
+		_emulator.Display.OnFrameProduced += UpdateDisplay;
 
-#pragma warning disable CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
-        KeyDown += WinFormsEmulatorSurface_KeyDown;
-        KeyUp += WinFormsEmulatorSurface_KeyUp;
-#pragma warning restore CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
-        
-        Closed += (_, e) => { _cancellation.Cancel(); };
-    }
+		KeyDown += EmulatorSurface_KeyDown!;
+		KeyUp += EmulatorSurface_KeyUp!;
+		Closed += (_, e) => { _cancellation.Cancel(); };
+	}
 
-    private void StartEmulator()
-    {
-        if (_emulator.Active)
-        {
-            _emulator.Stop(_cancellation);
-            _cancellation = new();
-            _pictureBox.Image = null;
-            Task.Delay(100).Wait();
-        }
+	private void StartEmulation()
+	{
+		if (_emulator.Active)
+		{
+			_emulator.Stop(_cancellation);
+			_cancellation = new CancellationTokenSource();
+			_pictureBox.Image = null;
+			Thread.Sleep(100);
+		}
 
-        using OpenFileDialog dialog = new()
-        {
-            Filter = "ROM files (*.gb;*.gbc)|*.gb;*.gbc| All files(*.*) |*.*",
-            FilterIndex = 0,
-            RestoreDirectory = true
-        };
+		using var openFileDialog = new OpenFileDialog
+		{
+			Filter = "Gameboy ROM (*.gb)|*.gb| All files(*.*) |*.*",
+			FilterIndex = 0,
+			RestoreDirectory = true
+		};
 
-        if (dialog.ShowDialog() == DialogResult.OK)
-        {
-            _gameboyOptions.Rom = dialog.FileName;
-            _emulator.Run(_cancellation.Token);
-        }
-    }
+		if (openFileDialog.ShowDialog() == DialogResult.OK)
+		{
+			_gameboyOptions.Rom = openFileDialog.FileName;
+			_emulator.Run(_cancellation.Token);
+		}
+	}
 
-    private void WinFormsEmulatorSurface_KeyDown(object sender, KeyEventArgs e)
-    {
-        if (_controls.TryGetValue(e.KeyCode, out var button))
-        {
-            _listener?.OnButtonPress(button);
-        }
-    }
+	private void Screenshot()
+	{
+		_emulator.TogglePause();
 
-    private void WinFormsEmulatorSurface_KeyUp(object sender, KeyEventArgs e)
-    {
-        if (_controls.TryGetValue(e.KeyCode, out var button))
-        {
-            _listener?.OnButtonRelease(button);
-        }
-    }
+		using var sfd = new SaveFileDialog
+		{
+			Filter = "Bitmap (*.bmp)|*.bmp",
+			FilterIndex = 0,
+			RestoreDirectory = true
+		};
 
-    public void SetButtonListener(IButtonListener listener) => _listener = listener;
+		var (success, romPath) = sfd.ShowDialog() == DialogResult.OK
+			? (true, sfd.FileName)
+			: (false, null);
 
-    protected override void OnResize(EventArgs e)
-    {
-        base.OnResize(e);
-        if (_pictureBox == null)
-        {
-            return;
-        }
+		if (success)
+		{
+			try
+			{
+				Monitor.Enter(_updateLock);
+				File.WriteAllBytes(sfd.FileName, _lastFrame);
+			}
+			finally
+			{
+				Monitor.Exit(_updateLock);
+			}
+		}
 
-        _pictureBox.Width = Width;
-        _pictureBox.Height = Height - _menu.Height - 50;
-    }
+		_emulator.TogglePause();
+	}
 
-    public void UpdateDisplay(object _, byte[] frame)
-    {
-        if (!Monitor.TryEnter(_updateLock))
-        {
-            return;
-        }
+	private void EmulatorSurface_KeyDown(object sender, KeyEventArgs e)
+	{
+		var button = _controls.ContainsKey(e.KeyCode) ? _controls[e.KeyCode] : null;
+		if (button != null)
+		{
+			_listener?.OnButtonPress(button);
+		}
+	}
 
-        try
-        {
-            using MemoryStream ms = new(frame);
-            _pictureBox.Image = Image.FromStream(ms);
-        }
-        finally
-        {
-            Monitor.Exit(_updateLock);
-        }
-    }
+	private void EmulatorSurface_KeyUp(object sender, KeyEventArgs e)
+	{
+		var button = _controls.ContainsKey(e.KeyCode) ? _controls[e.KeyCode] : null;
+		if (button != null)
+		{
+			_listener?.OnButtonRelease(button);
+		}
+	}
 
-    protected override void OnFormClosed(FormClosedEventArgs e)
-    {
-        base.OnFormClosed(e);
-        Environment.Exit(0);
-    }
+	public void SetButtonListener(IButtonListener listener) => _listener = listener;
+
+	protected override void OnResize(EventArgs e)
+	{
+		base.OnResize(e);
+		if (_pictureBox == null) return;
+
+		_pictureBox.Width = Width;
+		_pictureBox.Height = Height - _menu.Height - 50;
+	}
+
+	public void UpdateDisplay(object _, byte[] frame)
+	{
+		if (!Monitor.TryEnter(_updateLock)) return;
+
+		try
+		{
+			_lastFrame = frame;
+			using var memoryStream = new MemoryStream(frame);
+			_pictureBox.Image = Image.FromStream(memoryStream);
+		}
+		catch
+		{
+			// YOLO
+		}
+		finally
+		{
+			Monitor.Exit(_updateLock);
+		}
+	}
+
+	protected override void OnFormClosed(FormClosedEventArgs e)
+	{
+		base.OnFormClosed(e);
+		_pictureBox.Dispose();
+		Environment.Exit(0);
+	}
 }
