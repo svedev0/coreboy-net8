@@ -1,4 +1,6 @@
-﻿using coreboy.controller;
+﻿#nullable disable
+
+using coreboy.controller;
 using coreboy.gui;
 using Button = coreboy.controller.Button;
 using Tsmi = System.Windows.Forms.ToolStripMenuItem;
@@ -7,24 +9,24 @@ namespace coreboy.win;
 
 public partial class EmulatorSurface : Form, IController
 {
-	private IButtonListener _listener = null!;
+	private IButtonListener listener;
 
-	private byte[] _lastFrame = [];
-	private readonly MenuStrip _menu;
-	private readonly PictureBox _pictureBox;
-	private readonly Dictionary<Keys, Button> _controls;
+	private byte[] lastFrame = [];
+	private readonly MenuStrip menu;
+	private readonly PictureBox pictureBox;
+	private readonly Dictionary<Keys, Button> controls;
 
-	private readonly Emulator _emulator;
-	private readonly GameboyOptions _gameboyOptions;
-	private CancellationTokenSource _cancellation;
+	private readonly Emulator emulator;
+	private readonly GameboyOptions gbOptions;
+	private CancellationTokenSource cancellationSource;
 
-	private readonly object _updateLock = new();
+	private readonly object updateLock = new();
 
 	public EmulatorSurface()
 	{
 		InitializeComponent();
 
-		Controls.Add(_menu = new MenuStrip
+		Controls.Add(menu = new MenuStrip
 		{
 			Items =
 			{
@@ -38,7 +40,7 @@ public partial class EmulatorSurface : Form, IController
 						}),
 						new Tsmi("Pause", null, (sender, args) =>
 						{
-							_emulator?.TogglePause();
+							emulator?.TogglePause();
 						}),
 						new Tsmi("Quit", null, (sender, args) =>
 						{
@@ -59,54 +61,54 @@ public partial class EmulatorSurface : Form, IController
 			}
 		});
 
-		Controls.Add(_pictureBox = new PictureBox
+		Controls.Add(pictureBox = new PictureBox
 		{
-			Top = _menu.Height,
+			Top = menu.Height,
 			Width = BitmapDisplay.DisplayWidth * 5,
 			Height = BitmapDisplay.DisplayHeight * 5,
 			BackColor = Color.Black,
 			SizeMode = PictureBoxSizeMode.Zoom
 		});
 
-		_controls = new Dictionary<Keys, Button>
+		controls = new Dictionary<Keys, Button>
 		{
-			{Keys.Left, Button.Left},
-			{Keys.Right, Button.Right},
-			{Keys.Up, Button.Up},
-			{Keys.Down, Button.Down},
-			{Keys.Z, Button.A},
-			{Keys.X, Button.B},
-			{Keys.Enter, Button.Start},
-			{Keys.Back, Button.Select}
+			{ Keys.Left,  Button.Left },
+			{ Keys.Right, Button.Right },
+			{ Keys.Up,    Button.Up },
+			{ Keys.Down,  Button.Down },
+			{ Keys.Z,     Button.A },
+			{ Keys.X,     Button.B },
+			{ Keys.Enter, Button.Start },
+			{ Keys.Back,  Button.Select }
 		};
 
-		Height = _menu.Height + _pictureBox.Height + 50;
-		Width = _pictureBox.Width;
+		Height = menu.Height + pictureBox.Height + 50;
+		Width = pictureBox.Width;
 
-		_cancellation = new CancellationTokenSource();
-		_gameboyOptions = new GameboyOptions();
-		_emulator = new Emulator(_gameboyOptions);
+		cancellationSource = new CancellationTokenSource();
+		gbOptions = new GameboyOptions();
+		emulator = new Emulator(gbOptions);
 
 		ConnectEmulatorToPanel();
 	}
 
 	private void ConnectEmulatorToPanel()
 	{
-		_emulator.Controller = this;
-		_emulator.Display.OnFrameProduced += UpdateDisplay;
+		emulator.Controller = this;
+		emulator.Display.OnFrameProduced += UpdateDisplay;
 
 		KeyDown += EmulatorSurface_KeyDown!;
 		KeyUp += EmulatorSurface_KeyUp!;
-		Closed += (_, e) => { _cancellation.Cancel(); };
+		Closed += (_, e) => { cancellationSource.Cancel(); };
 	}
 
 	private void StartEmulator()
 	{
-		if (_emulator.Active)
+		if (emulator.Active)
 		{
-			_emulator.Stop(_cancellation);
-			_cancellation = new CancellationTokenSource();
-			_pictureBox.Image = null;
+			emulator.Stop(cancellationSource);
+			cancellationSource = new CancellationTokenSource();
+			pictureBox.Image = null;
 			Task.Delay(100).Wait();
 		}
 
@@ -119,14 +121,14 @@ public partial class EmulatorSurface : Form, IController
 
 		if (dialog.ShowDialog() == DialogResult.OK)
 		{
-			_gameboyOptions.Rom = dialog.FileName;
-			_emulator.Run(_cancellation.Token);
+			gbOptions.Rom = dialog.FileName;
+			emulator.Run(cancellationSource.Token);
 		}
 	}
 
 	private void TakeScreenshot()
 	{
-		_emulator.TogglePause();
+		emulator.TogglePause();
 
 		using SaveFileDialog dialog = new()
 		{
@@ -139,64 +141,64 @@ public partial class EmulatorSurface : Form, IController
 		{
 			try
 			{
-				Monitor.Enter(_updateLock);
-				File.WriteAllBytes(dialog.FileName, _lastFrame);
+				Monitor.Enter(updateLock);
+				File.WriteAllBytes(dialog.FileName, lastFrame);
 			}
 			finally
 			{
-				Monitor.Exit(_updateLock);
+				Monitor.Exit(updateLock);
 			}
 		}
 
-		_emulator.TogglePause();
+		emulator.TogglePause();
 	}
 
 	private void EmulatorSurface_KeyDown(object sender, KeyEventArgs e)
 	{
-		if (_controls.TryGetValue(e.KeyCode, out var button))
+		if (controls.TryGetValue(e.KeyCode, out var button))
 		{
-			_listener.OnButtonPress(button);
+			listener.OnButtonPress(button);
 		}
 	}
 
 	private void EmulatorSurface_KeyUp(object sender, KeyEventArgs e)
 	{
-		if (_controls.TryGetValue(e.KeyCode, out var button))
+		if (controls.TryGetValue(e.KeyCode, out var button))
 		{
-			_listener.OnButtonRelease(button);
+			listener.OnButtonRelease(button);
 		}
 	}
 
-	public void SetButtonListener(IButtonListener listener)
+	public void SetButtonListener(IButtonListener buttonListener)
 	{
-		_listener = listener;
+		listener = buttonListener;
 	}
 
 	protected override void OnResize(EventArgs e)
 	{
 		base.OnResize(e);
 
-		if (_pictureBox == null)
+		if (pictureBox == null)
 		{
 			return;
 		}
 
-		_pictureBox.Width = Width;
-		_pictureBox.Height = Height - _menu.Height - 50;
+		pictureBox.Width = Width;
+		pictureBox.Height = Height - menu.Height - 50;
 	}
 
 	public void UpdateDisplay(object _, byte[] frameBytes)
 	{
-		if (!Monitor.TryEnter(_updateLock))
+		if (!Monitor.TryEnter(updateLock))
 		{
 			return;
 		}
 
 		try
 		{
-			_lastFrame = frameBytes;
+			lastFrame = frameBytes;
 			using MemoryStream ms = new(frameBytes);
-			_pictureBox.Image = Image.FromStream(ms);
+			pictureBox.Image = Image.FromStream(ms);
 		}
 		catch
 		{
@@ -204,7 +206,7 @@ public partial class EmulatorSurface : Form, IController
 		}
 		finally
 		{
-			Monitor.Exit(_updateLock);
+			Monitor.Exit(updateLock);
 		}
 	}
 
