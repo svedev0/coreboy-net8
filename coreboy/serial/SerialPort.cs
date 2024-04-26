@@ -34,7 +34,7 @@ namespace coreboy.serial
 				_transferInProgress = false;
 				try
 				{
-					_sb = _serialEndpoint.transfer(_sb);
+					_sb = _serialEndpoint.Transfer(_sb);
 				}
 				catch (IOException e)
 				{
