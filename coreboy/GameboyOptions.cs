@@ -43,8 +43,7 @@ public class GameboyOptions
 
 	public const string UsageInfo =
 		"""
-		Usage:
-		coreboy.cli.exe path\to\rom.gb --option
+		Usage:  coreboy.cli.exe path\to\rom.gb --option
 		
 		Available options:
 		    -d, --force-dmg              Use DMG mode

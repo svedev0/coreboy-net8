@@ -20,15 +20,15 @@ public class Gameboy : IRunnable
 
 	public bool Pause { get; set; }
 
-	private readonly Gpu _gpu;
-	private readonly Timer _timer;
-	private readonly Dma _dma;
-	private readonly Hdma _hdma;
 	private readonly IDisplay _display;
-	private readonly Sound _sound;
-	private readonly SerialPort _serialPort;
+	private readonly Gpu gpu;
+	private readonly Timer timer;
+	private readonly Dma dma;
+	private readonly Hdma hdma;
+	private readonly Sound sound;
+	private readonly SerialPort serialPort;
 
-	private readonly bool _gbc;
+	private readonly bool gbcMode;
 
 	public Gameboy(
 		GameboyOptions options,
@@ -39,36 +39,36 @@ public class Gameboy : IRunnable
 		SerialEndpoint serialEndpoint)
 	{
 		_display = display;
-		_gbc = rom.Gbc;
+		gbcMode = rom.Gbc;
 		SpeedMode = new SpeedMode();
 
-		var interruptManager = new InterruptManager(_gbc);
+		var interruptManager = new InterruptManager(gbcMode);
 
-		_timer = new Timer(interruptManager, SpeedMode);
+		timer = new Timer(interruptManager, SpeedMode);
 		Mmu = new Mmu();
 
-		var oamRam = new Ram(0xfe00, 0x00a0);
+		Ram oamRam = new(0xfe00, 0x00a0);
 
-		_dma = new Dma(Mmu, oamRam, SpeedMode);
-		_gpu = new Gpu(display, interruptManager, _dma, oamRam, _gbc);
-		_hdma = new Hdma(Mmu);
-		_sound = new Sound(soundOutput, _gbc);
-		_serialPort = new SerialPort(interruptManager, serialEndpoint, SpeedMode);
+		dma = new Dma(Mmu, oamRam, SpeedMode);
+		gpu = new Gpu(display, interruptManager, dma, oamRam, gbcMode);
+		hdma = new Hdma(Mmu);
+		sound = new Sound(soundOutput, gbcMode);
+		serialPort = new SerialPort(interruptManager, serialEndpoint, SpeedMode);
 
 		Mmu.AddAddressSpace(rom);
-		Mmu.AddAddressSpace(_gpu);
+		Mmu.AddAddressSpace(gpu);
 		Mmu.AddAddressSpace(new Joypad(interruptManager, controller));
 		Mmu.AddAddressSpace(interruptManager);
-		Mmu.AddAddressSpace(_serialPort);
-		Mmu.AddAddressSpace(_timer);
-		Mmu.AddAddressSpace(_dma);
-		Mmu.AddAddressSpace(_sound);
-
+		Mmu.AddAddressSpace(serialPort);
+		Mmu.AddAddressSpace(timer);
+		Mmu.AddAddressSpace(dma);
+		Mmu.AddAddressSpace(sound);
 		Mmu.AddAddressSpace(new Ram(0xc000, 0x1000));
-		if (_gbc)
+
+		if (gbcMode)
 		{
 			Mmu.AddAddressSpace(SpeedMode);
-			Mmu.AddAddressSpace(_hdma);
+			Mmu.AddAddressSpace(hdma);
 			Mmu.AddAddressSpace(new GbcRam());
 			Mmu.AddAddressSpace(new UndocumentedGbcRegisters());
 		}
@@ -80,7 +80,7 @@ public class Gameboy : IRunnable
 		Mmu.AddAddressSpace(new Ram(0xff80, 0x7f));
 		Mmu.AddAddressSpace(new ShadowAddressSpace(Mmu, 0xe000, 0xc000, 0x1e00));
 
-		Cpu = new Cpu(Mmu, interruptManager, _gpu, display, SpeedMode);
+		Cpu = new Cpu(Mmu, interruptManager, gpu, display, SpeedMode);
 
 		interruptManager.DisableInterrupts(false);
 
@@ -93,9 +93,9 @@ public class Gameboy : IRunnable
 	private void InitiliseRegisters()
 	{
 		var registers = Cpu.Registers;
-
 		registers.SetAf(0x01b0);
-		if (_gbc)
+
+		if (gbcMode)
 		{
 			registers.A = 0x11;
 		}
@@ -109,44 +109,45 @@ public class Gameboy : IRunnable
 
 	public void Run(CancellationToken token)
 	{
-		var requestedScreenRefresh = false;
-		var lcdDisabled = false;
+		bool lcdRefreshRequested = false;
+		bool lcdDisabled = false;
 
 		while (!token.IsCancellationRequested)
 		{
 			if (Pause)
 			{
-				Thread.Sleep(1000);
+				Task.Delay(1000, token).Wait(token);
 				continue;
 			}
 
-			var newMode = Tick();
+			Gpu.Mode? newMode = Tick();
+
 			if (newMode.HasValue)
 			{
-				_hdma.OnGpuUpdate(newMode.Value);
+				hdma.OnGpuUpdate(newMode.Value);
 			}
 
-			if (!lcdDisabled && !_gpu.IsLcdEnabled())
+			if (!lcdDisabled && !gpu.IsLcdEnabled())
 			{
 				lcdDisabled = true;
 				_display.RequestRefresh();
-				_hdma.OnLcdSwitch(false);
+				hdma.OnLcdSwitch(false);
 			}
 			else if (newMode == Gpu.Mode.VBlank)
 			{
-				requestedScreenRefresh = true;
+				lcdRefreshRequested = true;
 				_display.RequestRefresh();
 			}
 
-			if (lcdDisabled && _gpu.IsLcdEnabled())
+			if (lcdDisabled && gpu.IsLcdEnabled())
 			{
 				lcdDisabled = false;
 				_display.WaitForRefresh();
-				_hdma.OnLcdSwitch(true);
+				hdma.OnLcdSwitch(true);
 			}
-			else if (requestedScreenRefresh && newMode == Gpu.Mode.OamSearch)
+			else if (lcdRefreshRequested && newMode == Gpu.Mode.OamSearch)
 			{
-				requestedScreenRefresh = false;
+				lcdRefreshRequested = false;
 				_display.WaitForRefresh();
 			}
 		}
@@ -154,19 +155,20 @@ public class Gameboy : IRunnable
 
 	public Gpu.Mode? Tick()
 	{
-		_timer.Tick();
-		if (_hdma.IsTransferInProgress())
+		timer.Tick();
+
+		if (hdma.IsTransferInProgress())
 		{
-			_hdma.Tick();
+			hdma.Tick();
 		}
 		else
 		{
 			Cpu.Tick();
 		}
 
-		_dma.Tick();
-		_sound.Tick();
-		_serialPort.Tick();
-		return _gpu.Tick();
+		dma.Tick();
+		sound.Tick();
+		serialPort.Tick();
+		return gpu.Tick();
 	}
 }
