@@ -1,92 +1,80 @@
-using System;
-using System.Diagnostics;
-using System.IO;
 using coreboy.cpu;
 
-namespace coreboy.serial
+namespace coreboy.serial;
+
+public class SerialPort(
+	InterruptManager interruptManager,
+	ISerialEndpoint serialEndpoint,
+	SpeedMode speedMode) : IAddressSpace
 {
-	public class SerialPort : IAddressSpace
+	private readonly ISerialEndpoint _serialEndpoint = serialEndpoint;
+	private readonly InterruptManager _interruptManager = interruptManager;
+	private readonly SpeedMode _speedMode = speedMode;
+	private int serialByte;
+	private int serialControl;
+	private bool transferInProgress;
+	private int divider;
+
+	public void Tick()
 	{
-		private readonly ISerialEndpoint _serialEndpoint;
-		private readonly InterruptManager _interruptManager;
-		private readonly SpeedMode _speedMode;
-		private int _sb;
-		private int _sc;
-		private bool _transferInProgress;
-		private int _divider;
-
-		public SerialPort(InterruptManager interruptManager, ISerialEndpoint serialEndpoint, SpeedMode speedMode)
+		if (!transferInProgress)
 		{
-			_interruptManager = interruptManager;
-			_serialEndpoint = serialEndpoint;
-			_speedMode = speedMode;
+			return;
 		}
 
-		public void Tick()
+		if (divider++ >= Gameboy.TicksPerSec / 8192 / _speedMode.GetSpeedMode())
 		{
-			if (!_transferInProgress)
+			transferInProgress = false;
+
+			try
 			{
-				return;
+				serialByte = _serialEndpoint.Transfer(serialByte);
+			}
+			catch (IOException e)
+			{
+				Console.WriteLine($"Can't transfer byte {e}");
+				serialByte = 0;
 			}
 
-			if (++_divider >= Gameboy.TicksPerSec / 8192 / _speedMode.GetSpeedMode())
-			{
-				_transferInProgress = false;
-				try
-				{
-					_sb = _serialEndpoint.Transfer(_sb);
-				}
-				catch (IOException e)
-				{
-					Debug.WriteLine($"Can't transfer byte {e}");
-					_sb = 0;
-				}
+			_interruptManager.RequestInterrupt(InterruptManager.InterruptType.Serial);
+		}
+	}
 
-				_interruptManager.RequestInterrupt(InterruptManager.InterruptType.Serial);
+	public bool Accepts(int address)
+	{
+		return address == 0xff01 || address == 0xff02;
+	}
+
+	public void SetByte(int address, int value)
+	{
+		if (address == 0xff01)
+		{
+			serialByte = value;
+		}
+		else if (address == 0xff02)
+		{
+			serialControl = value;
+
+			if ((serialControl & (1 << 7)) != 0)
+			{
+				StartTransfer();
 			}
 		}
+	}
 
-		public bool Accepts(int address)
+	public int GetByte(int address)
+	{
+		return address switch
 		{
-			return address == 0xff01 || address == 0xff02;
-		}
+			0xff01 => serialByte,
+			0xff02 => serialControl | 0b01111110,
+			_ => throw new ArgumentException($"Invalid address: {address}"),
+		};
+	}
 
-		public void SetByte(int address, int value)
-		{
-			if (address == 0xff01)
-			{
-				_sb = value;
-			}
-			else if (address == 0xff02)
-			{
-				_sc = value;
-				if ((_sc & (1 << 7)) != 0)
-				{
-					StartTransfer();
-				}
-			}
-		}
-
-		public int GetByte(int address)
-		{
-			if (address == 0xff01)
-			{
-				return _sb;
-			}
-			else if (address == 0xff02)
-			{
-				return _sc | 0b01111110;
-			}
-			else
-			{
-				throw new ArgumentException();
-			}
-		}
-
-		private void StartTransfer()
-		{
-			_transferInProgress = true;
-			_divider = 0;
-		}
+	private void StartTransfer()
+	{
+		transferInProgress = true;
+		divider = 0;
 	}
 }
