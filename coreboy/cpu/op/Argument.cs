@@ -1,119 +1,158 @@
 #nullable disable
 
+using InvalidOpE = System.InvalidOperationException;
+
 namespace coreboy.cpu.op;
 
-public class Argument
+public class Argument(
+	string label, int operandLength, bool isMemory, DataType dataType)
 {
-	public string Label { get; }
-	public int OperandLength { get; }
-	public bool IsMemory { get; }
-	public DataType DataType { get; }
+	public string Label { get; } = label;
+	public int OperandLength { get; } = operandLength;
+	public bool IsMemory { get; } = isMemory;
+	public DataType DataType { get; } = dataType;
 	public static List<Argument> Values { get; }
 
 	static Argument()
 	{
-		Values = new List<Argument>
-		{
-			new Argument("A").Handle((r, a, args) => r.A, (r, a, i1, value) => r.A = value),
-			new Argument("B").Handle((r, a, args) => r.B, (r, a, i1, value) => r.B = value),
-			new Argument("C").Handle((r, a, args) => r.C, (r, a, i1, value) => r.C = value),
-			new Argument("D").Handle((r, a, args) => r.D, (r, a, i1, value) => r.D = value),
-			new Argument("E").Handle((r, a, args) => r.E, (r, a, i1, value) => r.E = value),
-			new Argument("H").Handle((r, a, args) => r.H, (r, a, i1, value) => r.H = value),
-			new Argument("L").Handle((r, a, args) => r.L, (r, a, i1, value) => r.L = value),
+		Values = [
+			new Argument("A").Handle(
+				(reg, addr, args) => reg.A,
+				(reg, addr, i1, value) => reg.A = value),
 
-			new Argument("AF", 0, false, DataType.D16)
-				.Handle((r, a, args) => r.AF, (r, a, i1, value) => r.SetAf(value)),
+			new Argument("B").Handle(
+				(reg, addr, args) => reg.B,
+				(reg, addr, i1, value) => reg.B = value),
 
-			new Argument("BC", 0, false, DataType.D16)
-				.Handle((r, a, args) => r.BC, (r, a, i1, value) => r.SetBc(value)),
+			new Argument("C").Handle(
+				(reg, addr, args) => reg.C,
+				(reg, addr, i1, value) => reg.C = value),
 
-			new Argument("DE", 0, false, DataType.D16)
-				.Handle((r, a, args) => r.DE, (r, a, i1, value) => r.SetDe(value)),
+			new Argument("D").Handle(
+				(reg, addr, args) => reg.D,
+				(reg, addr, i1, value) => reg.D = value),
 
-			new Argument("HL", 0, false, DataType.D16)
-				.Handle((r, a, args) => r.HL, (r, a, i1, value) => r.SetHl(value)),
+			new Argument("E").Handle(
+				(reg, addr, args) => reg.E,
+				(reg, addr, i1, value) => reg.E = value),
 
-			new Argument("SP", 0, false, DataType.D16)
-				.Handle((r, a, args) => r.SP, (r, a, i1, value) => r.SP = value),
+			new Argument("H").Handle(
+				(reg, addr, args) => reg.H,
+				(reg, addr, i1, value) => reg.H = value),
 
-			new Argument("PC", 0, false, DataType.D16)
-				.Handle((r, a, args) => r.PC, (r, a, i1, value) => r.PC = value),
+			new Argument("L").Handle(
+				(reg, addr, args) => reg.L,
+				(reg, addr, i1, value) => reg.L = value),
 
-			new Argument("d8", 1, false, DataType.D8)
-				.Handle((r, a, args) => args[0], (r, a, i1, value) => throw new InvalidOperationException("Unsupported")),
+			new Argument("AF", 0, false, DataType.D16).Handle(
+				(reg, addr, args) => reg.AF,
+				(reg, addr, i1, value) => reg.SetAf(value)),
 
-			new Argument("d16", 2, false, DataType.D16)
-				.Handle((r, a, args) => BitUtils.ToWord(args), (r, a, i1, value) => throw new InvalidOperationException("Unsupported")),
+			new Argument("BC", 0, false, DataType.D16).Handle(
+				(reg, addr, args) => reg.BC,
+				(reg, addr, i1, value) => reg.SetBc(value)),
 
-			new Argument("r8", 1, false, DataType.R8)
-				.Handle((r, a, args) => BitUtils.ToSigned(args[0]), (r, a, i1, value) => throw new InvalidOperationException("Unsupported")),
+			new Argument("DE", 0, false, DataType.D16).Handle(
+				(reg, addr, args) => reg.DE,
+				(reg, addr, i1, value) => reg.SetDe(value)),
 
-			new Argument("a16", 2, false, DataType.D16)
-				.Handle((r, a, args) => BitUtils.ToWord(args), (r, a, i1, value) => throw new InvalidOperationException("Unsupported")),
+			new Argument("HL", 0, false, DataType.D16).Handle(
+				(reg, addr, args) => reg.HL,
+				(reg, addr, i1, value) => reg.SetHl(value)),
+
+			new Argument("SP", 0, false, DataType.D16).Handle(
+				(reg, addr, args) => reg.SP,
+				(reg, addr, i1, value) => reg.SP = value),
+
+			new Argument("PC", 0, false, DataType.D16).Handle(
+				(reg, addr, args) => reg.PC,
+				(reg, addr, i1, value) => reg.PC = value),
+
+			new Argument("d8", 1, false, DataType.D8).Handle(
+				(reg, addr, args) => args[0],
+				(reg, addr, i1, value) => throw new InvalidOpE("Unsupported")),
+
+			new Argument("d16", 2, false, DataType.D16).Handle(
+				(reg, addr, args) => BitUtils.ToWord(args),
+				(reg, addr, i1, value) => throw new InvalidOpE("Unsupported")),
+
+			new Argument("r8", 1, false, DataType.R8).Handle(
+				(reg, addr, args) => BitUtils.ToSigned(args[0]),
+				(reg, addr, i1, value) => throw new InvalidOpE("Unsupported")),
+
+			new Argument("a16", 2, false, DataType.D16).Handle(
+				(reg, addr, args) => BitUtils.ToWord(args),
+				(reg, addr, i1, value) => throw new InvalidOpE("Unsupported")),
 				
             // _BC
-            new Argument("(BC)", 0, true, DataType.D8)
-				.Handle((r, a, args) => a.GetByte(r.BC), (r, a, i1, value) => a.SetByte(r.BC, value)),
+            new Argument("(BC)", 0, true, DataType.D8).Handle(
+				(reg, addr, args) => addr.GetByte(reg.BC),
+				(reg, addr, i1, value) => addr.SetByte(reg.BC, value)),
 
             // _DE
-            new Argument("(DE)", 0, true, DataType.D8)
-				.Handle((r, a, args) => a.GetByte(r.DE), (r, a, i1, value) => a.SetByte(r.DE, value)),
+            new Argument("(DE)", 0, true, DataType.D8).Handle(
+				(reg, addr, args) => addr.GetByte(reg.DE),
+				(reg, addr, i1, value) => addr.SetByte(reg.DE, value)),
 
             // _HL
-            new Argument("(HL)", 0, true, DataType.D8)
-				.Handle((r, a, args) => a.GetByte(r.HL), (r, a, i1, value) => a.SetByte(r.HL, value)),
+            new Argument("(HL)", 0, true, DataType.D8).Handle(
+				(reg, addr, args) => addr.GetByte(reg.HL),
+				(reg, addr, i1, value) => addr.SetByte(reg.HL, value)),
 
             // _a8
-            new Argument("(a8)", 1, true, DataType.D8)
-				.Handle((r, a, args) => a.GetByte(0xff00 | args[0]), (r, a, i1, value) => a.SetByte(0xff00 | i1[0], value)),
+            new Argument("(a8)", 1, true, DataType.D8).Handle(
+				(reg, addr, args) => addr.GetByte(0xff00 | args[0]),
+				(reg, addr, i1, value) => addr.SetByte(0xff00 | i1[0], value)),
 
             // _a16
-            new Argument("(a16)", 2, true, DataType.D8)
-				.Handle((r, a, args) => a.GetByte(BitUtils.ToWord(args)), (r, a, i1, value) => a.SetByte(BitUtils.ToWord(i1), value)),
+            new Argument("(a16)", 2, true, DataType.D8).Handle(
+				(reg, addr, args) => addr.GetByte(BitUtils.ToWord(args)),
+				(reg, addr, i1, value) => addr.SetByte(BitUtils.ToWord(i1), value)),
 
             // _C
-            new Argument("(C)", 0, true, DataType.D8)
-				.Handle((r, a, args) => a.GetByte(0xff00 | r.C), (r, a, i1, value) => a.SetByte(0xff00 | r.C, value))
-		};
+            new Argument("(C)", 0, true, DataType.D8).Handle(
+				(reg, addr, args) => addr.GetByte(0xff00 | reg.C),
+				(reg, addr, i1, value) => addr.SetByte(0xff00 | reg.C, value))
+		];
 	}
 
 	private Func<Registers, IAddressSpace, int[], int> _readFunc;
 	private Action<Registers, IAddressSpace, int[], int> _writeAction;
 
-	public Argument(string label)
-		: this(label, 0, false, DataType.D8)
+	public Argument(string label) : this(label, 0, false, DataType.D8)
 	{
 	}
 
-	public Argument(string label, int operandLength, bool isMemory, DataType dataType)
-	{
-		Label = label;
-		OperandLength = operandLength;
-		IsMemory = isMemory;
-		DataType = dataType;
-	}
-
-	public Argument Handle(Func<Registers, IAddressSpace, int[], int> readFunc, Action<Registers, IAddressSpace, int[], int> writeAction)
+	public Argument Handle(
+		Func<Registers, IAddressSpace, int[], int> readFunc,
+		Action<Registers, IAddressSpace, int[], int> writeAction)
 	{
 		_readFunc = readFunc;
 		_writeAction = writeAction;
 		return this;
 	}
 
-	public int Read(Registers registers, IAddressSpace addressSpace, int[] args) => _readFunc(registers, addressSpace, args);
-	public void Write(Registers registers, IAddressSpace addressSpace, int[] args, int value) => _writeAction(registers, addressSpace, args, value);
-
-	public static Argument Parse(string @string)
+	public int Read(Registers registers, IAddressSpace addressSpace, int[] args)
 	{
-		foreach (var a in Values)
+		return _readFunc(registers, addressSpace, args);
+	}
+
+	public void Write(
+		Registers registers, IAddressSpace addressSpace, int[] args, int value)
+	{
+		_writeAction(registers, addressSpace, args, value);
+	}
+
+	public static Argument Parse(string argument)
+	{
+		foreach (var arg in Values)
 		{
-			if (a.Label.Equals(@string))
+			if (arg.Label.Equals(argument))
 			{
-				return a;
+				return arg;
 			}
 		}
 
-		throw new ArgumentException("Unknown argument: " + @string);
+		throw new ArgumentException($"Unknown argument: {argument}");
 	}
 }
