@@ -17,7 +17,7 @@ namespace coreboy.gui
 		public Gameboy Gameboy { get; set; }
 		public IDisplay Display { get; set; } = new BitmapDisplay();
 		public IController Controller { get; set; } = new NullController();
-		public SerialEndpoint SerialEndpoint { get; set; } = new NullSerialEndpoint();
+		public ISerialEndpoint ISerialEndpoint { get; set; } = new NullSerialEndpoint();
 		public GameboyOptions Options { get; set; } = options;
 		public bool Active { get; set; }
 
@@ -89,10 +89,10 @@ namespace coreboy.gui
 
 			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 			{
-				return new Gameboy(Options, rom, Display, Controller, new WinSound(), SerialEndpoint);
+				return new Gameboy(Options, rom, Display, Controller, new WinSound(), ISerialEndpoint);
 			}
 
-			return new Gameboy(Options, rom, Display, Controller, new NullSoundOutput(), SerialEndpoint);
+			return new Gameboy(Options, rom, Display, Controller, new NullSoundOutput(), ISerialEndpoint);
 		}
 	}
 }

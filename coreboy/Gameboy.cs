@@ -36,7 +36,7 @@ public class Gameboy : IRunnable
 		IDisplay display,
 		IController controller,
 		ISoundOutput soundOutput,
-		SerialEndpoint serialEndpoint)
+		ISerialEndpoint serialEndpoint)
 	{
 		_display = display;
 		gbcMode = rom.Gbc;
