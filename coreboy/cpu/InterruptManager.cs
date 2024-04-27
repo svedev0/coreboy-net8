@@ -1,137 +1,147 @@
-using System.Collections.Generic;
+namespace coreboy.cpu;
 
-namespace coreboy.cpu
+public class InterruptManager(bool gbc) : IAddressSpace
 {
-    public class InterruptManager : IAddressSpace
-    {
-        private bool _ime;
-        private readonly bool _gbc;
-        private int _interruptFlag = 0xe1;
-        private int _interruptEnabled;
-        private int _pendingEnableInterrupts = -1;
-        private int _pendingDisableInterrupts = -1;
+	private bool ime;
+	private readonly bool _gbc = gbc;
+	private int interruptFlag = 0xe1;
+	private int interruptEnabled;
+	private int pendingEnableInterrupts = -1;
+	private int pendingDisableInterrupts = -1;
 
-        public InterruptManager(bool gbc)
-        {
-            _gbc = gbc;
-        }
+	public void EnableInterrupts(bool withDelay)
+	{
+		pendingDisableInterrupts = -1;
 
-        public void EnableInterrupts(bool withDelay)
-        {
-            _pendingDisableInterrupts = -1;
-            if (withDelay)
-            {
-                if (_pendingEnableInterrupts == -1)
-                {
-                    _pendingEnableInterrupts = 1;
-                }
-            }
-            else
-            {
-                _pendingEnableInterrupts = -1;
-                _ime = true;
-            }
-        }
+		if (withDelay)
+		{
+			if (pendingEnableInterrupts == -1)
+			{
+				pendingEnableInterrupts = 1;
+			}
+		}
+		else
+		{
+			pendingEnableInterrupts = -1;
+			ime = true;
+		}
+	}
 
-        public void DisableInterrupts(bool withDelay)
-        {
-            _pendingEnableInterrupts = -1;
-            if (withDelay && _gbc)
-            {
-                if (_pendingDisableInterrupts == -1)
-                {
-                    _pendingDisableInterrupts = 1;
-                }
-            }
-            else
-            {
-                _pendingDisableInterrupts = -1;
-                _ime = false;
-            }
-        }
+	public void DisableInterrupts(bool withDelay)
+	{
+		pendingEnableInterrupts = -1;
 
-        public void RequestInterrupt(InterruptType type) => _interruptFlag |= 1 << type.Ordinal;
-        public void ClearInterrupt(InterruptType type) => _interruptFlag &= ~(1 << type.Ordinal);
+		if (withDelay && _gbc)
+		{
+			if (pendingDisableInterrupts == -1)
+			{
+				pendingDisableInterrupts = 1;
+			}
+		}
+		else
+		{
+			pendingDisableInterrupts = -1;
+			ime = false;
+		}
+	}
 
-        public void OnInstructionFinished()
-        {
-            if (_pendingEnableInterrupts != -1)
-            {
-                if (_pendingEnableInterrupts-- == 0)
-                {
-                    EnableInterrupts(false);
-                }
-            }
+	public void RequestInterrupt(InterruptType type)
+	{
+		interruptFlag |= 1 << type.Ordinal;
+	}
 
-            if (_pendingDisableInterrupts != -1)
-            {
-                if (_pendingDisableInterrupts-- == 0)
-                {
-                    DisableInterrupts(false);
-                }
-            }
-        }
+	public void ClearInterrupt(InterruptType type)
+	{
+		interruptFlag &= ~(1 << type.Ordinal);
+	}
 
-        public bool IsIme() => _ime;
-        public bool IsInterruptRequested() => (_interruptFlag & _interruptEnabled) != 0;
-        public bool IsHaltBug() => (_interruptFlag & _interruptEnabled & 0x1f) != 0 && !_ime;
-        public bool Accepts(int address) => address == 0xff0f || address == 0xffff;
+	public void OnInstructionFinished()
+	{
+		if (pendingEnableInterrupts != -1)
+		{
+			if (pendingEnableInterrupts-- == 0)
+			{
+				EnableInterrupts(false);
+			}
+		}
 
-        public void SetByte(int address, int value)
-        {
-            switch (address)
-            {
-                case 0xff0f:
-                    _interruptFlag = value | 0xe0;
-                    break;
+		if (pendingDisableInterrupts != -1)
+		{
+			if (pendingDisableInterrupts-- == 0)
+			{
+				DisableInterrupts(false);
+			}
+		}
+	}
 
-                case 0xffff:
-                    _interruptEnabled = value;
-                    break;
-            }
-        }
+	public bool IsIme()
+	{
+		return ime;
+	}
 
-        public int GetByte(int address)
-        {
-            switch (address)
-            {
-                case 0xff0f:
-                    return _interruptFlag;
+	public bool IsInterruptRequested()
+	{
+		return (interruptFlag & interruptEnabled) != 0;
+	}
 
-                case 0xffff:
-                    return _interruptEnabled;
+	public bool IsHaltBug()
+	{
+		return (interruptFlag & interruptEnabled & 0x1f) != 0 && !ime;
+	}
 
-                default:
-                    return 0xff;
-            }
-        }
+	public bool Accepts(int address)
+	{
+		return address == 0xff0f || address == 0xffff;
+	}
 
-        public class InterruptType
-        {
-            public static InterruptType VBlank = new InterruptType(0x0040, 0);
-            public static InterruptType Lcdc = new InterruptType(0x0048, 1);
-            public static InterruptType Timer = new InterruptType(0x0050, 2);
-            public static InterruptType Serial = new InterruptType(0x0058, 3);
-            public static InterruptType P1013 = new InterruptType(0x0060, 4);
+	public void SetByte(int address, int value)
+	{
+		switch (address)
+		{
+			case 0xff0f:
+				interruptFlag = value | 0xe0;
+				break;
 
-            public int Ordinal { get; }
+			case 0xffff:
+				interruptEnabled = value;
+				break;
+		}
+	}
 
-            public int Handler { get; }
+	public int GetByte(int address)
+	{
+		return address switch
+		{
+			0xff0f => interruptFlag,
+			0xffff => interruptEnabled,
+			_ => 0xff,
+		};
+	}
 
-            private InterruptType(int handler, int ordinal)
-            {
-                Ordinal = ordinal;
-                Handler = handler;
-            }
+	public class InterruptType
+	{
+		public static readonly InterruptType VBlank = new(0x0040, 0);
+		public static readonly InterruptType Lcdc = new(0x0048, 1);
+		public static readonly InterruptType Timer = new(0x0050, 2);
+		public static readonly InterruptType Serial = new(0x0058, 3);
+		public static readonly InterruptType P1013 = new(0x0060, 4);
 
-            public static IEnumerable<InterruptType> Values()
-            {
-                yield return VBlank;
-                yield return Lcdc;
-                yield return Timer;
-                yield return Serial;
-                yield return P1013;
-            }
-        }
-    }
+		public int Ordinal { get; }
+		public int Handler { get; }
+
+		private InterruptType(int handler, int ordinal)
+		{
+			Ordinal = ordinal;
+			Handler = handler;
+		}
+
+		public static IEnumerable<InterruptType> Values()
+		{
+			yield return VBlank;
+			yield return Lcdc;
+			yield return Timer;
+			yield return Serial;
+			yield return P1013;
+		}
+	}
 }
