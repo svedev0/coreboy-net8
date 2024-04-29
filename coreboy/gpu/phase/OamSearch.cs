@@ -2,114 +2,104 @@
 
 using coreboy.memory;
 
-namespace coreboy.gpu.phase
+namespace coreboy.gpu.phase;
+
+public class OamSearch(IAddressSpace oemRam, Lcdc lcdc, MemoryRegisters registers) : IGpuPhase
 {
-	public class OamSearch : IGpuPhase
+	private enum State
 	{
-		private enum State
+		ReadingY,
+		ReadingX
+	}
+
+	public sealed class SpritePosition(int x, int y, int address)
+	{
+		private readonly int _x = x;
+		private readonly int _y = y;
+		private readonly int _address = address;
+
+		public int GetX()
 		{
-			ReadingY,
-			ReadingX
+			return _x;
 		}
 
-		public sealed class SpritePosition
+		public int GetY()
 		{
-
-			private readonly int _x;
-			private readonly int _y;
-			private readonly int _address;
-
-			public SpritePosition(int x, int y, int address)
-			{
-				this._x = x;
-				this._y = y;
-				this._address = address;
-			}
-
-			public int GetX()
-			{
-				return _x;
-			}
-
-			public int GetY()
-			{
-				return _y;
-			}
-
-			public int GetAddress()
-			{
-				return _address;
-			}
+			return _y;
 		}
 
-		private readonly IAddressSpace _oemRam;
-		private readonly MemoryRegisters _registers;
-		private readonly SpritePosition[] _sprites;
-		private readonly Lcdc _lcdc;
-		private int _spritePosIndex;
-		private State _state;
-		private int _spriteY;
-		private int _spriteX;
-		private int _i;
-
-		public OamSearch(IAddressSpace oemRam, Lcdc lcdc, MemoryRegisters registers)
+		public int GetAddress()
 		{
-			this._oemRam = oemRam;
-			this._registers = registers;
-			this._lcdc = lcdc;
-			_sprites = new SpritePosition[10];
+			return _address;
+		}
+	}
+
+	private readonly IAddressSpace _oemRam = oemRam;
+	private readonly MemoryRegisters _registers = registers;
+	private readonly SpritePosition[] _sprites = new SpritePosition[10];
+	private readonly Lcdc _lcdc = lcdc;
+	private int spritePosIndex;
+	private State state;
+	private int spriteY;
+	private int spriteX;
+	private int index;
+
+	public OamSearch Start()
+	{
+		spritePosIndex = 0;
+		state = State.ReadingY;
+		spriteY = 0;
+		spriteX = 0;
+		index = 0;
+
+		for (int j = 0; j < _sprites.Length; j++)
+		{
+			_sprites[j] = null;
 		}
 
-		public OamSearch Start()
-		{
-			_spritePosIndex = 0;
-			_state = State.ReadingY;
-			_spriteY = 0;
-			_spriteX = 0;
-			_i = 0;
-			for (var j = 0; j < _sprites.Length; j++)
-			{
-				_sprites[j] = null;
-			}
+		return this;
+	}
 
-			return this;
+	public bool Tick()
+	{
+		int spriteAddress = 0xfe00 + 4 * index;
+
+		switch (state)
+		{
+			case State.ReadingY:
+				spriteY = _oemRam.GetByte(spriteAddress);
+				state = State.ReadingX;
+				break;
+
+			case State.ReadingX:
+				spriteX = _oemRam.GetByte(spriteAddress + 1);
+
+				bool between = Between(
+					spriteY,
+					_registers.Get(GpuRegister.Ly) + 16,
+					spriteY + _lcdc.GetSpriteHeight());
+
+				if (spritePosIndex < _sprites.Length && between)
+				{
+					_sprites[spritePosIndex++] = new SpritePosition(
+						spriteX, spriteY, spriteAddress);
+				}
+
+				index++;
+				state = State.ReadingY;
+				break;
 		}
 
+		return index < 40;
+	}
 
-		public bool Tick()
-		{
-			var spriteAddress = 0xfe00 + 4 * _i;
-			switch (_state)
-			{
-				case State.ReadingY:
-					_spriteY = _oemRam.GetByte(spriteAddress);
-					_state = State.ReadingX;
-					break;
+	public SpritePosition[] GetSprites()
+	{
+		return _sprites;
+	}
 
-				case State.ReadingX:
-					_spriteX = _oemRam.GetByte(spriteAddress + 1);
-					if (_spritePosIndex < _sprites.Length && Between(_spriteY, _registers.Get(GpuRegister.Ly) + 16,
-							_spriteY + _lcdc.GetSpriteHeight()))
-					{
-						_sprites[_spritePosIndex++] = new SpritePosition(_spriteX, _spriteY, spriteAddress);
-					}
-
-					_i++;
-					_state = State.ReadingY;
-					break;
-			}
-
-			return _i < 40;
-		}
-
-		public SpritePosition[] GetSprites()
-		{
-			return _sprites;
-		}
-
-		private static bool Between(int from, int x, int to)
-		{
-			return from <= x && x < to;
-		}
+	private static bool Between(int from, int x, int to)
+	{
+		return from <= x && x < to;
 	}
 }

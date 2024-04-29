@@ -1,21 +1,18 @@
-namespace coreboy.gpu.phase
+namespace coreboy.gpu.phase;
+
+public class HBlankPhase : IGpuPhase
 {
-    public class HBlankPhase : IGpuPhase
-    {
+	private int ticks;
 
-        private int _ticks;
+	public HBlankPhase Start(int ticksInLine)
+	{
+		ticks = ticksInLine;
+		return this;
+	}
 
-        public HBlankPhase Start(int ticksInLine)
-        {
-            _ticks = ticksInLine;
-            return this;
-        }
-
-        public bool Tick()
-        {
-            _ticks++;
-            return _ticks < 456;
-        }
-
-    }
+	public bool Tick()
+	{
+		ticks++;
+		return ticks < 456;
+	}
 }

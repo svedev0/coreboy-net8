@@ -1,7 +1,6 @@
-namespace coreboy.gpu.phase
+namespace coreboy.gpu.phase;
+
+public interface IGpuPhase
 {
-    public interface IGpuPhase
-    {
-        bool Tick();
-    }
+	bool Tick();
 }

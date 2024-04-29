@@ -1,18 +1,17 @@
-namespace coreboy.gpu.phase
+namespace coreboy.gpu.phase;
+
+public class VBlankPhase : IGpuPhase
 {
-    public class VBlankPhase : IGpuPhase
-    {
-        private int _ticks;
+	private int ticks;
 
-        public VBlankPhase Start()
-        {
-            _ticks = 0;
-            return this;
-        }
+	public VBlankPhase Start()
+	{
+		ticks = 0;
+		return this;
+	}
 
-        public bool Tick()
-        {
-            return ++_ticks < 456;
-        }
-    }
+	public bool Tick()
+	{
+		return ticks++ < 456;
+	}
 }
