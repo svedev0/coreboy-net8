@@ -1,7 +1,6 @@
-namespace coreboy.memory.cart.rtc
+namespace coreboy.memory.cart.rtc;
+
+public interface IClock
 {
-    public interface IClock
-    {
-        long CurrentTimeMillis();
-    }
+	long CurrentTimeMillis();
 }

@@ -1,8 +1,6 @@
-namespace coreboy.memory.cart.rtc
-{
+namespace coreboy.memory.cart.rtc;
 
-    public static class Clock
-    {
-        public static IClock SystemClock { get; } = new SystemClock();
-    }
+public static class Clock
+{
+	public static IClock SystemClock { get; } = new SystemClock();
 }

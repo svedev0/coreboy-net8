@@ -1,9 +1,9 @@
-using System;
+namespace coreboy.memory.cart.rtc;
 
-namespace coreboy.memory.cart.rtc
+public class SystemClock : IClock
 {
-    public class SystemClock : IClock
-    {
-        public long CurrentTimeMillis() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-    }
+	public long CurrentTimeMillis()
+	{
+		return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+	}
 }
