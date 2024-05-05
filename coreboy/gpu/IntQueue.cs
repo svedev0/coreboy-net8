@@ -1,25 +1,41 @@
-using System.Collections.Generic;
+namespace coreboy.gpu;
 
-namespace coreboy.gpu
+public class IntQueue(int capacity)
 {
-    public class IntQueue
-    {
-        private Queue<int> _inner;
-        public IntQueue(int capacity) => _inner = new Queue<int>(capacity);
-        public int Size() => _inner.Count;
-        public void Enqueue(int value) => _inner.Enqueue(value);
-        public int Dequeue() => _inner.Dequeue();
-        public int Get(int index) => _inner.ToArray()[index];
-        public void Clear() => _inner.Clear();
+	private Queue<int> _inner = new(capacity);
 
-        public void Set(int index, int value)
-        {
-            lock (_inner)
-            {
-                var asArray = _inner.ToArray();
-                asArray[index] = value;
-                _inner = new Queue<int>(asArray);
-            }
-        }
-    }
+	public int Size()
+	{
+		return _inner.Count;
+	}
+
+	public void Enqueue(int value)
+	{
+		_inner.Enqueue(value);
+	}
+
+	public int Dequeue()
+	{
+		return _inner.Dequeue();
+	}
+
+	public int Get(int index)
+	{
+		return _inner.ToArray()[index];
+	}
+
+	public void Clear()
+	{
+		_inner.Clear();
+	}
+
+	public void Set(int index, int value)
+	{
+		lock (_inner)
+		{
+			var asArray = _inner.ToArray();
+			asArray[index] = value;
+			_inner = new Queue<int>(asArray);
+		}
+	}
 }
