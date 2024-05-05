@@ -1,97 +1,109 @@
 using coreboy.memory.cart.battery;
 
-namespace coreboy.memory.cart.type
+namespace coreboy.memory.cart.type;
+
+public class Mbc2 : IAddressSpace
 {
-    public class Mbc2 : IAddressSpace
-    {
-        private readonly int[] _cartridge;
-        private readonly int[] _ram;
-        private readonly IBattery _battery;
-        private int _selectedRomBank = 1;
-        private bool _ramWriteEnabled;
+	private readonly int[] _cartridge;
+	private readonly int[] _ram;
+	private readonly IBattery _battery;
 
-        public Mbc2(int[] cartridge, CartridgeType type, IBattery battery, int romBanks)
-        {
-            _cartridge = cartridge;
-            _ram = new int[0x0200];
-            for (var i = 0; i < _ram.Length; i++)
-            {
-                _ram[i] = 0xff;
-            }
+	private int selectedRomBank = 1;
+	private bool ramWriteEnabled;
 
-            _battery = battery;
-            battery.LoadRam(_ram);
-        }
+	public Mbc2(int[] cartridge, CartridgeType type, IBattery battery, int romBanks)
+	{
+		_cartridge = cartridge;
+		_ram = new int[0x0200];
 
-        public bool Accepts(int address) => address >= 0x0000 && address < 0x8000 || address >= 0xa000 && address < 0xc000;
+		for (int i = 0; i < _ram.Length; i++)
+		{
+			_ram[i] = 0xff;
+		}
 
-        public void SetByte(int address, int value)
-        {
-            if (address >= 0x0000 && address < 0x2000)
-            {
-                if ((address & 0x0100) == 0)
-                {
-                    _ramWriteEnabled = (value & 0b1010) != 0;
-                    if (!_ramWriteEnabled)
-                    {
-                        _battery.SaveRam(_ram);
-                    }
-                }
-            }
-            else if (address >= 0x2000 && address < 0x4000)
-            {
-                if ((address & 0x0100) != 0)
-                {
-                    _selectedRomBank = value & 0b00001111;
-                }
-            }
-            else if (address >= 0xa000 && address < 0xc000 && _ramWriteEnabled)
-            {
-                var ramAddress = GetRamAddress(address);
-                if (ramAddress < _ram.Length)
-                {
-                    _ram[ramAddress] = value & 0x0f;
-                }
-            }
-        }
+		_battery = battery;
+		battery.LoadRam(_ram);
+	}
 
-        public int GetByte(int address)
-        {
-            if (address >= 0x0000 && address < 0x4000)
-            {
-                return GetRomByte(0, address);
-            }
+	public bool Accepts(int address)
+	{
+		return address >= 0x0000 &&
+			address < 0x8000 || address >= 0xa000 &&
+			address < 0xc000;
+	}
 
-            if (address >= 0x4000 && address < 0x8000)
-            {
-                return GetRomByte(_selectedRomBank, address - 0x4000);
-            }
+	public void SetByte(int address, int value)
+	{
+		if (address >= 0x0000 && address < 0x2000)
+		{
+			if ((address & 0x0100) == 0)
+			{
+				ramWriteEnabled = (value & 0b1010) != 0;
+				if (!ramWriteEnabled)
+				{
+					_battery.SaveRam(_ram);
+				}
+			}
+		}
+		else if (address >= 0x2000 && address < 0x4000)
+		{
+			if ((address & 0x0100) != 0)
+			{
+				selectedRomBank = value & 0b00001111;
+			}
+		}
+		else if (address >= 0xa000 && address < 0xc000 && ramWriteEnabled)
+		{
+			int ramAddress = GetRamAddress(address);
 
-            if (address >= 0xa000 && address < 0xb000)
-            {
-                var ramAddress = GetRamAddress(address);
-                if (ramAddress < _ram.Length)
-                {
-                    return _ram[ramAddress];
-                }
+			if (ramAddress < _ram.Length)
+			{
+				_ram[ramAddress] = value & 0x0f;
+			}
+		}
+	}
 
-                return 0xff;
-            }
+	public int GetByte(int address)
+	{
+		if (address >= 0x0000 && address < 0x4000)
+		{
+			return GetRomByte(0, address);
+		}
 
-            return 0xff;
-        }
+		if (address >= 0x4000 && address < 0x8000)
+		{
+			return GetRomByte(selectedRomBank, address - 0x4000);
+		}
 
-        private int GetRomByte(int bank, int address)
-        {
-            var cartOffset = bank * 0x4000 + address;
-            if (cartOffset < _cartridge.Length)
-            {
-                return _cartridge[cartOffset];
-            }
+		if (address >= 0xa000 && address < 0xb000)
+		{
+			int ramAddress = GetRamAddress(address);
 
-            return 0xff;
-        }
+			if (ramAddress < _ram.Length)
+			{
+				return _ram[ramAddress];
+			}
 
-        private static int GetRamAddress(int address) => address - 0xa000;
-    }
+			return 0xff;
+		}
+
+		return 0xff;
+	}
+
+	private int GetRomByte(int bank, int address)
+	{
+		int cartOffset = bank * 0x4000 + address;
+
+		if (cartOffset < _cartridge.Length)
+		{
+			return _cartridge[cartOffset];
+		}
+
+		return 0xff;
+	}
+
+	private static int GetRamAddress(int address)
+	{
+		return address - 0xa000;
+	}
 }
