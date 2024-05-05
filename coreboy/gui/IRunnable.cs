@@ -1,9 +1,6 @@
-using System.Threading;
+namespace coreboy.gui;
 
-namespace coreboy.gui
+public interface IRunnable
 {
-    public interface IRunnable
-    {
-        void Run(CancellationToken token);
-    }
+	void Run(CancellationToken token);
 }

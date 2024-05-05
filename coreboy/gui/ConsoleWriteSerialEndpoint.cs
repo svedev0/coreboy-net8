@@ -1,14 +1,12 @@
-using System;
 using coreboy.serial;
 
-namespace coreboy.gui
+namespace coreboy.gui;
+
+public class ConsoleWriteSerialEndpoint : ISerialEndpoint
 {
-	public class ConsoleWriteSerialEndpoint : ISerialEndpoint
+	public int Transfer(int b)
 	{
-		public int Transfer(int b)
-		{
-			Console.Write((char)b);
-			return 0;
-		}
+		Console.Write((char)b);
+		return 0;
 	}
 }
