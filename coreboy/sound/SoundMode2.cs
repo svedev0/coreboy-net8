@@ -1,93 +1,86 @@
-using System;
+namespace coreboy.sound;
 
-namespace coreboy.sound
+public class SoundMode2(bool gbc) : SoundModeBase(0xff15, 64, gbc)
 {
+	private readonly VolumeEnvelope _volumeEnvelope = new();
+	private int freqDivider;
+	private int lastOutput;
+	private int index;
 
-    public class SoundMode2 : SoundModeBase
-    {
-        private int _freqDivider;
-        private int _lastOutput;
-        private int _i;
-        private readonly VolumeEnvelope _volumeEnvelope;
+	public override void Start()
+	{
+		index = 0;
 
-        public SoundMode2(bool gbc) 
-            : base(0xff15, 64, gbc)
-        {
-            _volumeEnvelope = new VolumeEnvelope();
-        }
-        
-        public override void Start()
-        {
-            _i = 0;
-            if (Gbc)
-            {
-                Length.Reset();
-            }
+		if (Gbc)
+		{
+			Length.Reset();
+		}
 
-            Length.Start();
-            _volumeEnvelope.Start();
-        }
+		Length.Start();
+		_volumeEnvelope.Start();
+	}
 
+	protected override void Trigger()
+	{
+		index = 0;
+		freqDivider = 1;
+		_volumeEnvelope.Trigger();
+	}
 
-        protected override void Trigger()
-        {
-            _i = 0;
-            _freqDivider = 1;
-            _volumeEnvelope.Trigger();
-        }
-        
+	public override int Tick()
+	{
+		_volumeEnvelope.Tick();
 
-        public override int Tick()
-        {
-            _volumeEnvelope.Tick();
+		bool env = UpdateLength();
+		env = DacEnabled && env;
 
-            var e = UpdateLength();
-            e = DacEnabled && e;
-            if (!e)
-            {
-                return 0;
-            }
+		if (!env)
+		{
+			return 0;
+		}
 
-            if (--_freqDivider == 0)
-            {
-                ResetFreqDivider();
-                _lastOutput = ((GetDuty() & (1 << _i)) >> _i);
-                _i = (_i + 1) % 8;
-            }
+		freqDivider--;
 
-            return _lastOutput * _volumeEnvelope.GetVolume();
-        }
+		if (freqDivider == 0)
+		{
+			ResetFreqDivider();
+			lastOutput = (GetDuty() & (1 << index)) >> index;
+			index = (index + 1) % 8;
+		}
 
-        protected override void SetNr1(int value)
-        {
-            base.SetNr1(value);
-            Length.SetLength(64 - (value & 0b00111111));
-        }
+		return lastOutput * _volumeEnvelope.GetVolume();
+	}
 
-        protected override void SetNr2(int value)
-        {
-            base.SetNr2(value);
-            _volumeEnvelope.SetNr2(value);
-            DacEnabled = (value & 0b11111000) != 0;
-            ChannelEnabled &= DacEnabled;
-        }
+	protected override void SetNr1(int value)
+	{
+		base.SetNr1(value);
+		Length.SetLength(64 - (value & 0b00111111));
+	}
 
-        private int GetDuty()
-        {
-            var i = GetNr1() >> 6;
-            return i switch
-            {
-                0 => 0b00000001,
-                1 => 0b10000001,
-                2 => 0b10000111,
-                3 => 0b01111110,
-                _ => throw new InvalidOperationException("Illegal operation")
-            };
-        }
+	protected override void SetNr2(int value)
+	{
+		base.SetNr2(value);
+		_volumeEnvelope.SetNr2(value);
+		DacEnabled = (value & 0b11111000) != 0;
+		ChannelEnabled &= DacEnabled;
+	}
 
-        private void ResetFreqDivider()
-        {
-            _freqDivider = GetFrequency() * 4;
-        }
-    }
+	private int GetDuty()
+	{
+		int i = GetNr1() >> 6;
+
+		return i switch
+		{
+			0 => 0b00000001,
+			1 => 0b10000001,
+			2 => 0b10000111,
+			3 => 0b01111110,
+			_ => throw new InvalidOperationException("Illegal operation")
+		};
+	}
+
+	private void ResetFreqDivider()
+	{
+		freqDivider = GetFrequency() * 4;
+	}
 }

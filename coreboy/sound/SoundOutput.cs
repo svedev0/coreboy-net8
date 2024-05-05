@@ -1,9 +1,8 @@
-namespace coreboy.sound
+namespace coreboy.sound;
+
+public interface ISoundOutput
 {
-    public interface ISoundOutput
-    {
-        void Start();
-        void Stop();
-        void Play(int left, int right);
-    }
+	void Start();
+	void Stop();
+	void Play(int left, int right);
 }

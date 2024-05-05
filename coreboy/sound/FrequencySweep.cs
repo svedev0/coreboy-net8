@@ -1,120 +1,159 @@
-namespace coreboy.sound
+namespace coreboy.sound;
+
+public class FrequencySweep
 {
-    public class FrequencySweep
-    {
-        private static readonly int Divider = Gameboy.TicksPerSec / 128;
+	private static readonly int Divider = Gameboy.TicksPerSec / 128;
 
-        // sweep parameters
-        private int _period;
-        private bool _negate;
-        private int _shift;
+	// sweep parameters
+	private int _period;
+	private bool _negate;
+	private int _shift;
 
-        // current process variables
-        private int _timer;
-        private int _shadowFreq;
-        private int _nr13;
-        private int _nr14;
-        private int _i;
-        private bool _overflow;
-        private bool _counterEnabled;
-        private bool _negging;
+	// current process variables
+	private int _timer;
+	private int _shadowFreq;
+	private int _nr13;
+	private int _nr14;
+	private int _index;
+	private bool _overflow;
+	private bool _counterEnabled;
+	private bool _negging;
 
-        public void Start()
-        {
-            _counterEnabled = false;
-            _i = 8192;
-        }
+	public void Start()
+	{
+		_counterEnabled = false;
+		_index = 8192;
+	}
 
-        public void Trigger()
-        {
-            _negging = false;
-            _overflow = false;
+	public void Trigger()
+	{
+		_negging = false;
+		_overflow = false;
 
-            _shadowFreq = _nr13 | ((_nr14 & 0b111) << 8);
-            _timer = _period == 0 ? 8 : _period;
-            _counterEnabled = _period != 0 || _shift != 0;
+		_shadowFreq = _nr13 | ((_nr14 & 0b111) << 8);
 
-            if (_shift > 0)
-            {
-                Calculate();
-            }
-        }
+		if (_period == 0)
+		{
+			_timer = 8;
+		}
+		else
+		{
+			_timer = _period;
+		}
 
-        public void SetNr10(int value)
-        {
-            _period = (value >> 4) & 0b111;
-            _negate = (value & (1 << 3)) != 0;
-            _shift = value & 0b111;
-            if (_negging && !_negate)
-            {
-                _overflow = true;
-            }
-        }
+		_counterEnabled = _period != 0 || _shift != 0;
 
-        public void SetNr13(int value) => _nr13 = value;
+		if (_shift > 0)
+		{
+			Calculate();
+		}
+	}
 
-        public void SetNr14(int value)
-        {
-            _nr14 = value;
-            if ((value & (1 << 7)) != 0)
-            {
-                Trigger();
-            }
-        }
+	public void SetNr10(int value)
+	{
+		_period = (value >> 4) & 0b111;
+		_negate = (value & (1 << 3)) != 0;
+		_shift = value & 0b111;
 
-        public int GetNr13() => _nr13;
-        public int GetNr14() => _nr14;
+		if (_negging && !_negate)
+		{
+			_overflow = true;
+		}
+	}
 
-        public void Tick()
-        {
-            _i++;
+	public void SetNr13(int value)
+	{
+		_nr13 = value;
+	}
 
-            if (_i != Divider) return;
+	public void SetNr14(int value)
+	{
+		_nr14 = value;
 
-            _i = 0;
+		if ((value & (1 << 7)) != 0)
+		{
+			Trigger();
+		}
+	}
 
-            if (!_counterEnabled) return;
-            
-            _timer--;
+	public int GetNr13()
+	{
+		return _nr13;
+	}
 
-            if (_timer != 0) return;
+	public int GetNr14()
+	{
+		return _nr14;
+	}
 
-            _timer = _period == 0 ? 8 : _period;
+	public void Tick()
+	{
+		_index++;
 
-            if (_period == 0) return;
+		if (_index != Divider)
+		{
+			return;
+		}
 
-            var newFreq = Calculate();
+		_index = 0;
 
-            if (_overflow || _shift == 0) return;
+		if (!_counterEnabled)
+		{
+			return;
+		}
 
-            _shadowFreq = newFreq;
-            _nr13 = _shadowFreq & 0xff;
-            _nr14 = (_shadowFreq & 0x700) >> 8;
+		_timer--;
 
-            Calculate();
-        }
+		if (_timer != 0)
+		{
+			return;
+		}
 
-        private int Calculate()
-        {
-            var freq = _shadowFreq >> _shift;
-            if (_negate)
-            {
-                freq = _shadowFreq - freq;
-                _negging = true;
-            }
-            else
-            {
-                freq = _shadowFreq + freq;
-            }
+		_timer = _period == 0 ? 8 : _period;
 
-            if (freq > 2047)
-            {
-                _overflow = true;
-            }
+		if (_period == 0)
+		{
+			return;
+		}
 
-            return freq;
-        }
+		int newFreq = Calculate();
 
-        public bool IsEnabled() => !_overflow;
-    }
+		if (_overflow || _shift == 0)
+		{
+			return;
+		}
+
+		_shadowFreq = newFreq;
+		_nr13 = _shadowFreq & 0xff;
+		_nr14 = (_shadowFreq & 0x700) >> 8;
+
+		Calculate();
+	}
+
+	private int Calculate()
+	{
+		int freq = _shadowFreq >> _shift;
+
+		if (_negate)
+		{
+			freq = _shadowFreq - freq;
+			_negging = true;
+		}
+		else
+		{
+			freq = _shadowFreq + freq;
+		}
+
+		if (freq > 2047)
+		{
+			_overflow = true;
+		}
+
+		return freq;
+	}
+
+	public bool IsEnabled()
+	{
+		return !_overflow;
+	}
 }
