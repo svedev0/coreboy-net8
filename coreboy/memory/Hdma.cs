@@ -12,11 +12,13 @@ public class Hdma(IAddressSpace addressSpace) : IAddressSpace
 
 	private readonly IAddressSpace _addressSpace = addressSpace;
 	private readonly Ram _hdma1234 = new(Hdma1, 4);
-	private Gpu.Mode? _gpuMode;
+
+	private Gpu.Mode? gpuMode;
 
 	private bool transferInProgress;
-	private bool hBlankTransfer;
+	private bool hblankTransfer;
 	private bool lcdEnabled;
+
 	private int length;
 	private int src;
 	private int dst;
@@ -34,7 +36,9 @@ public class Hdma(IAddressSpace addressSpace) : IAddressSpace
 			return;
 		}
 
-		if (++tick < 0x20)
+		tick++;
+
+		if (tick < 0x20)
 		{
 			return;
 		}
@@ -47,16 +51,14 @@ public class Hdma(IAddressSpace addressSpace) : IAddressSpace
 		src += 0x10;
 		dst += 0x10;
 
-		length--;
-
-		if (length == 0)
+		if (length-- == 0)
 		{
 			transferInProgress = false;
 			length = 0x7f;
 		}
-		else if (hBlankTransfer)
+		else if (hblankTransfer)
 		{
-			_gpuMode = null; // wait until next HBlank
+			gpuMode = null; // wait until next HBlank
 		}
 	}
 
@@ -96,12 +98,12 @@ public class Hdma(IAddressSpace addressSpace) : IAddressSpace
 
 	public void OnGpuUpdate(Gpu.Mode newGpuMode)
 	{
-		_gpuMode = newGpuMode;
+		gpuMode = newGpuMode;
 	}
 
-	public void OnLcdSwitch(bool lcdEnabled)
+	public void OnLcdSwitch(bool isEnabled)
 	{
-		this.lcdEnabled = lcdEnabled;
+		lcdEnabled = isEnabled;
 	}
 
 	public bool IsTransferInProgress()
@@ -111,17 +113,17 @@ public class Hdma(IAddressSpace addressSpace) : IAddressSpace
 			return false;
 		}
 
-		if (hBlankTransfer && (_gpuMode == Gpu.Mode.HBlank || !lcdEnabled))
+		if (hblankTransfer && (gpuMode == Gpu.Mode.HBlank || !lcdEnabled))
 		{
 			return true;
 		}
 
-		return !hBlankTransfer;
+		return !hblankTransfer;
 	}
 
 	private void StartTransfer(int reg)
 	{
-		hBlankTransfer = (reg & (1 << 7)) != 0;
+		hblankTransfer = (reg & (1 << 7)) != 0;
 		length = reg & 0x7f;
 
 		src = (_hdma1234.GetByte(Hdma1) << 8) |

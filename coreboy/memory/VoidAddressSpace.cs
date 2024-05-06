@@ -2,7 +2,10 @@ namespace coreboy.memory;
 
 public class VoidAddressSpace : IAddressSpace
 {
-	public bool Accepts(int address) => true;
+	public bool Accepts(int address)
+	{
+		return true;
+	}
 
 	public void SetByte(int address, int value)
 	{

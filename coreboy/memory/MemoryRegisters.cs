@@ -28,7 +28,7 @@ public class MemoryRegisters : IAddressSpace
 	private MemoryRegisters(MemoryRegisters original)
 	{
 		_registers = original._registers;
-		_values = new Dictionary<int, int>(original._values);
+		_values = new(original._values);
 	}
 
 	public int Get(IRegister reg)
@@ -64,7 +64,7 @@ public class MemoryRegisters : IAddressSpace
 			throw new ArgumentException("Not valid register: " + reg);
 		}
 
-		int value = _values[reg.Address] + 1;
+		var value = _values[reg.Address] + 1;
 		_values[reg.Address] = value;
 		return value;
 	}
@@ -76,7 +76,7 @@ public class MemoryRegisters : IAddressSpace
 
 	public void SetByte(int address, int value)
 	{
-		RegisterType regType = _registers[address].Type;
+		var regType = _registers[address].Type;
 
 		if (_allowsWrite.Contains(regType))
 		{
@@ -86,7 +86,15 @@ public class MemoryRegisters : IAddressSpace
 
 	public int GetByte(int address)
 	{
-		RegisterType regType = _registers[address].Type;
-		return _allowsRead.Contains(regType) ? _values[address] : 0xff;
+		var regType = _registers[address].Type;
+		
+		if (_allowsRead.Contains(regType))
+		{
+			return _values[address];
+		}
+		else
+		{
+			return 0xff;
+		}
 	}
 }

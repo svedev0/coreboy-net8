@@ -1,7 +1,10 @@
 namespace coreboy.memory;
 
 public class ShadowAddressSpace(
-	IAddressSpace addressSpace, int echoStart, int targetStart, int length) : IAddressSpace
+	IAddressSpace addressSpace,
+	int echoStart,
+	int targetStart,
+	int length) : IAddressSpace
 {
 	private readonly IAddressSpace _addressSpace = addressSpace;
 	private readonly int _echoStart = echoStart;

@@ -3,9 +3,11 @@ using coreboy.cpu;
 namespace coreboy.memory;
 
 public class Dma(
-	IAddressSpace addressSpace, IAddressSpace oam, SpeedMode speedMode) : IAddressSpace
+	IAddressSpace addressSpace,
+	IAddressSpace oam,
+	SpeedMode speedMode) : IAddressSpace
 {
-	private readonly IAddressSpace _addressSpace = new DmaAddressSpace(addressSpace);
+	private readonly DmaAddressSpace _addressSpace = new(addressSpace);
 	private readonly IAddressSpace _oam = oam;
 	private readonly SpeedMode _speedMode = speedMode;
 
@@ -27,9 +29,7 @@ public class Dma(
 			return;
 		}
 
-		ticks++;
-
-		if (ticks < 648 / _speedMode.GetSpeedMode())
+		if (++ticks < 648 / _speedMode.GetSpeedMode())
 		{
 			return;
 		}
@@ -37,7 +37,7 @@ public class Dma(
 		transferInProgress = false;
 		restarted = false;
 		ticks = 0;
-
+		
 		for (int i = 0; i < 0xa0; i++)
 		{
 			_oam.SetByte(0xfe00 + i, _addressSpace.GetByte(from + i));
@@ -60,6 +60,6 @@ public class Dma(
 
 	public bool IsOamBlocked()
 	{
-		return restarted || transferInProgress && ticks >= 5;
+		return restarted || (transferInProgress && ticks >= 5);
 	}
 }
