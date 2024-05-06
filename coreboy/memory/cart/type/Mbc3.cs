@@ -139,7 +139,7 @@ public class Mbc3 : IAddressSpace
 		}
 		else
 		{
-			throw new ArgumentException(Integer.ToHexString(address));
+			throw new ArgumentException("Invalid address");
 		}
 	}
 

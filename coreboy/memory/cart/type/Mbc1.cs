@@ -136,7 +136,7 @@ public class Mbc1 : IAddressSpace
 			return 0xff;
 		}
 
-		throw new ArgumentException(Integer.ToHexString(address));
+		throw new ArgumentException("Invalid address");
 	}
 
 	private int GetRomBankFor0x0000()
