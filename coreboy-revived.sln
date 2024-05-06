@@ -2,15 +2,16 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.34818.151
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coreboy", "coreboy\coreboy.csproj", "{1680C147-29FC-4455-A58A-B6827E86895E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coreboy", "coreboy\coreboy.csproj", "{1680C147-29FC-4455-A58A-B6827E86895E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coreboy.cli", "coreboy.cli\coreboy.cli.csproj", "{E175537A-4CCC-4436-AC6D-F0009461B273}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coreboy.cli", "coreboy.cli\coreboy.cli.csproj", "{E175537A-4CCC-4436-AC6D-F0009461B273}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coreboy.win", "coreboy.win\coreboy.win.csproj", "{EE08FD45-8CF3-456E-AFD9-6547FEE487D4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coreboy.win", "coreboy.win\coreboy.win.csproj", "{EE08FD45-8CF3-456E-AFD9-6547FEE487D4}"
 EndProject
 Global
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {D9BFA90E-B4C7-451C-B53A-BEAA8F90299F}
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{1680C147-29FC-4455-A58A-B6827E86895E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -26,11 +27,10 @@ Global
 		{EE08FD45-8CF3-456E-AFD9-6547FEE487D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EE08FD45-8CF3-456E-AFD9-6547FEE487D4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D9BFA90E-B4C7-451C-B53A-BEAA8F90299F}
 	EndGlobalSection
 EndGlobal
