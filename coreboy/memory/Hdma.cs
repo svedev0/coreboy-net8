@@ -1,128 +1,141 @@
-using System;
 using coreboy.gpu;
 
-namespace coreboy.memory
+namespace coreboy.memory;
+
+public class Hdma(IAddressSpace addressSpace) : IAddressSpace
 {
-    public class Hdma : IAddressSpace
-    {
-        private const int Hdma1 = 0xff51;
-        private const int Hdma2 = 0xff52;
-        private const int Hdma3 = 0xff53;
-        private const int Hdma4 = 0xff54;
-        private const int Hdma5 = 0xff55;
+	private const int Hdma1 = 0xff51;
+	private const int Hdma2 = 0xff52;
+	private const int Hdma3 = 0xff53;
+	private const int Hdma4 = 0xff54;
+	private const int Hdma5 = 0xff55;
 
-        private readonly IAddressSpace _addressSpace;
-        private readonly Ram _hdma1234 = new Ram(Hdma1, 4);
-        private Gpu.Mode? _gpuMode;
+	private readonly IAddressSpace _addressSpace = addressSpace;
+	private readonly Ram _hdma1234 = new(Hdma1, 4);
+	private Gpu.Mode? _gpuMode;
 
-        private bool _transferInProgress;
-        private bool _hblankTransfer;
-        private bool _lcdEnabled;
+	private bool transferInProgress;
+	private bool hBlankTransfer;
+	private bool lcdEnabled;
+	private int length;
+	private int src;
+	private int dst;
+	private int tick;
 
-        private int _length;
-        private int _src;
-        private int _dst;
-        private int _tick;
+	public bool Accepts(int address)
+	{
+		return address >= Hdma1 && address <= Hdma5;
+	}
 
-        public Hdma(IAddressSpace addressSpace) => _addressSpace = addressSpace;
-        public bool Accepts(int address) => address >= Hdma1 && address <= Hdma5;
+	public void Tick()
+	{
+		if (!IsTransferInProgress())
+		{
+			return;
+		}
 
-        public void Tick()
-        {
-            if (!IsTransferInProgress())
-            {
-                return;
-            }
+		if (++tick < 0x20)
+		{
+			return;
+		}
 
-            if (++_tick < 0x20)
-            {
-                return;
-            }
+		for (int j = 0; j < 0x10; j++)
+		{
+			_addressSpace.SetByte(dst + j, _addressSpace.GetByte(src + j));
+		}
 
-            for (var j = 0; j < 0x10; j++)
-            {
-                _addressSpace.SetByte(_dst + j, _addressSpace.GetByte(_src + j));
-            }
+		src += 0x10;
+		dst += 0x10;
 
-            _src += 0x10;
-            _dst += 0x10;
-            if (_length-- == 0)
-            {
-                _transferInProgress = false;
-                _length = 0x7f;
-            }
-            else if (_hblankTransfer)
-            {
-                _gpuMode = null; // wait until next HBlank
-            }
-        }
+		length--;
 
-        public void SetByte(int address, int value)
-        {
-            if (_hdma1234.Accepts(address))
-            {
-                _hdma1234.SetByte(address, value);
-            }
-            else if (address == Hdma5)
-            {
-                //if (_transferInProgress && (address & (1 << 7)) == 0) // Apparently the second part of this expression is always true
-                if (_transferInProgress)
-                {
-                    StopTransfer();
-                }
-                else
-                {
-                    StartTransfer(value);
-                }
-            }
-        }
+		if (length == 0)
+		{
+			transferInProgress = false;
+			length = 0x7f;
+		}
+		else if (hBlankTransfer)
+		{
+			_gpuMode = null; // wait until next HBlank
+		}
+	}
 
-        public int GetByte(int address)
-        {
-            if (_hdma1234.Accepts(address))
-            {
-                return 0xff;
-            }
+	public void SetByte(int address, int value)
+	{
+		if (_hdma1234.Accepts(address))
+		{
+			_hdma1234.SetByte(address, value);
+		}
+		else if (address == Hdma5)
+		{
+			if (transferInProgress)
+			{
+				StopTransfer();
+			}
+			else
+			{
+				StartTransfer(value);
+			}
+		}
+	}
 
-            if (address == Hdma5)
-            {
-                return (_transferInProgress ? 0 : (1 << 7)) | _length;
-            }
+	public int GetByte(int address)
+	{
+		if (_hdma1234.Accepts(address))
+		{
+			return 0xff;
+		}
 
-            throw new ArgumentException();
-        }
+		if (address == Hdma5)
+		{
+			return (transferInProgress ? 0 : (1 << 7)) | length;
+		}
 
-        public void OnGpuUpdate(Gpu.Mode newGpuMode) => _gpuMode = newGpuMode;
-        public void OnLcdSwitch(bool lcdEnabled) => _lcdEnabled = lcdEnabled;
+		throw new ArgumentException("Invalid address");
+	}
 
-        public bool IsTransferInProgress()
-        {
-            if (!_transferInProgress)
-            {
-                return false;
-            }
+	public void OnGpuUpdate(Gpu.Mode newGpuMode)
+	{
+		_gpuMode = newGpuMode;
+	}
 
-            if (_hblankTransfer && (_gpuMode == Gpu.Mode.HBlank || !_lcdEnabled))
-            {
-                return true;
-            }
+	public void OnLcdSwitch(bool lcdEnabled)
+	{
+		this.lcdEnabled = lcdEnabled;
+	}
 
-            return !_hblankTransfer;
-        }
+	public bool IsTransferInProgress()
+	{
+		if (!transferInProgress)
+		{
+			return false;
+		}
 
-        private void StartTransfer(int reg)
-        {
-            _hblankTransfer = (reg & (1 << 7)) != 0;
-            _length = reg & 0x7f;
+		if (hBlankTransfer && (_gpuMode == Gpu.Mode.HBlank || !lcdEnabled))
+		{
+			return true;
+		}
 
-            _src = (_hdma1234.GetByte(Hdma1) << 8) | (_hdma1234.GetByte(Hdma2) & 0xf0);
-            _dst = ((_hdma1234.GetByte(Hdma3) & 0x1f) << 8) | (_hdma1234.GetByte(Hdma4) & 0xf0);
-            _src = _src & 0xfff0;
-            _dst = (_dst & 0x1fff) | 0x8000;
+		return !hBlankTransfer;
+	}
 
-            _transferInProgress = true;
-        }
+	private void StartTransfer(int reg)
+	{
+		hBlankTransfer = (reg & (1 << 7)) != 0;
+		length = reg & 0x7f;
 
-        private void StopTransfer() => _transferInProgress = false;
-    }
+		src = (_hdma1234.GetByte(Hdma1) << 8) |
+			(_hdma1234.GetByte(Hdma2) & 0xf0);
+		dst = ((_hdma1234.GetByte(Hdma3) & 0x1f) << 8) |
+			(_hdma1234.GetByte(Hdma4) & 0xf0);
+		src &= 0xfff0;
+		dst = (dst & 0x1fff) | 0x8000;
+
+		transferInProgress = true;
+	}
+
+	private void StopTransfer()
+	{
+		transferInProgress = false;
+	}
 }

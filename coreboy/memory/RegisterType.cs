@@ -1,9 +1,8 @@
-namespace coreboy.memory
+namespace coreboy.memory;
+
+public enum RegisterType
 {
-    public enum RegisterType
-    {
-        R,
-        W,
-        RW
-    }
+	R,
+	W,
+	RW
 }

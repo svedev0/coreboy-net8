@@ -1,83 +1,92 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
+namespace coreboy.memory;
 
-namespace coreboy.memory
+public class MemoryRegisters : IAddressSpace
 {
-    public class MemoryRegisters : IAddressSpace
-    {
-        private readonly Dictionary<int, IRegister> _registers;
-        private readonly Dictionary<int, int> _values = new Dictionary<int, int>();
-        private readonly RegisterType[] _allowsWrite = {RegisterType.W, RegisterType.RW};
-        private readonly RegisterType[] _allowsRead = {RegisterType.R, RegisterType.RW};
+	private readonly Dictionary<int, IRegister> _registers;
+	private readonly Dictionary<int, int> _values = [];
+	private readonly RegisterType[] _allowsWrite = [RegisterType.W, RegisterType.RW];
+	private readonly RegisterType[] _allowsRead = [RegisterType.R, RegisterType.RW];
 
-        public MemoryRegisters(params IRegister[] registers)
-        {
-            var map = new Dictionary<int, IRegister>();
-            foreach (var r in registers)
-            {
-                if (map.ContainsKey(r.Address))
-                {
-                    throw new ArgumentException($"Two registers with the same address: {r.Address}");
-                }
+	public MemoryRegisters(params IRegister[] registers)
+	{
+		Dictionary<int, IRegister> map = [];
 
-                map.Add(r.Address, r);
-                _values.Add(r.Address, 0);
-            }
+		foreach (var reg in registers)
+		{
+			if (map.ContainsKey(reg.Address))
+			{
+				throw new ArgumentException("Two registers with the same address");
+			}
 
-            _registers = map;
-        }
+			map.Add(reg.Address, reg);
+			_values.Add(reg.Address, 0);
+		}
 
-        private MemoryRegisters(MemoryRegisters original)
-        {
-            _registers = original._registers;
-            _values = new Dictionary<int, int>(original._values);
-        }
+		_registers = map;
+	}
 
-        public int Get(IRegister reg)
-        {
-            return _registers.ContainsKey(reg.Address)
-                ? _values[reg.Address]
-                : throw new ArgumentException("Not valid register: " + reg);
-        }
+	private MemoryRegisters(MemoryRegisters original)
+	{
+		_registers = original._registers;
+		_values = new Dictionary<int, int>(original._values);
+	}
 
-        public void Put(IRegister reg, int value)
-        {
-            _values[reg.Address] = _registers.ContainsKey(reg.Address)
-                ? value
-                : throw new ArgumentException("Not valid register: " + reg);
-        }
+	public int Get(IRegister reg)
+	{
+		if (_registers.ContainsKey(reg.Address))
+		{
+			return _values[reg.Address];
+		}
+		else
+		{
+			throw new ArgumentException("Not valid register: " + reg);
+		}
+	}
 
-        public MemoryRegisters Freeze() => new MemoryRegisters(this);
+	public void Put(IRegister reg, int value)
+	{
+		if (_registers.ContainsKey(reg.Address))
+		{
+			_values[reg.Address] = value;
+		}
+		else
+		{
+			throw new ArgumentException("Not valid register: " + reg);
+		}
+	}
 
-        public int PreIncrement(IRegister reg)
-        {
-            if (!_registers.ContainsKey(reg.Address))
-            {
-                throw new ArgumentException("Not valid register: " + reg);
-            }
+	public MemoryRegisters Freeze() => new(this);
 
-            var value = _values[reg.Address] + 1;
-            _values[reg.Address] = value;
-            return value;
-        }
+	public int PreIncrement(IRegister reg)
+	{
+		if (!_registers.ContainsKey(reg.Address))
+		{
+			throw new ArgumentException("Not valid register: " + reg);
+		}
 
-        public bool Accepts(int address) => _registers.ContainsKey(address);
+		int value = _values[reg.Address] + 1;
+		_values[reg.Address] = value;
+		return value;
+	}
 
-        public void SetByte(int address, int value)
-        {
-            var regType = _registers[address].Type;
-            if (_allowsWrite.Contains(regType))
-            {
-                _values[address] = value;
-            }
-        }
+	public bool Accepts(int address)
+	{
+		return _registers.ContainsKey(address);
+	}
 
-        public int GetByte(int address)
-        {
-            var regType = _registers[address].Type; 
-            return _allowsRead.Contains(regType) ? _values[address] : 0xff;
-        }
-    }
+	public void SetByte(int address, int value)
+	{
+		RegisterType regType = _registers[address].Type;
+
+		if (_allowsWrite.Contains(regType))
+		{
+			_values[address] = value;
+		}
+	}
+
+	public int GetByte(int address)
+	{
+		RegisterType regType = _registers[address].Type;
+		return _allowsRead.Contains(regType) ? _values[address] : 0xff;
+	}
 }
-

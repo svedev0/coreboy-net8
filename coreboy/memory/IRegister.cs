@@ -1,8 +1,7 @@
-namespace coreboy.memory
+namespace coreboy.memory;
+
+public interface IRegister
 {
-    public interface IRegister
-    {
-        int Address { get; }
-        RegisterType Type { get; }
-    }
+	int Address { get; }
+	RegisterType Type { get; }
 }
