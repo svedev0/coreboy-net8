@@ -2,6 +2,10 @@
 
 using coreboy.controller;
 using coreboy.gui;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.Processing;
+using ISImage = SixLabors.ImageSharp.Image;
+using SDImage = System.Drawing.Image;
 using Button = coreboy.controller.Button;
 using Tsmi = System.Windows.Forms.ToolStripMenuItem;
 
@@ -114,7 +118,7 @@ public partial class EmulatorSurface : Form, IController
 
 		using OpenFileDialog dialog = new()
 		{
-			Filter = "ROM files (*.gb;*.gbc)|*.gb;*.gbc| All files(*.*) |*.*",
+			Filter = "ROM files (*.gb;*.gbc)|*.gb;*.gbc",
 			FilterIndex = 0,
 			RestoreDirectory = true
 		};
@@ -130,9 +134,12 @@ public partial class EmulatorSurface : Form, IController
 	{
 		emulator.TogglePause();
 
-		using SaveFileDialog dialog = new()
+        using var image = ISImage.Load(lastFrame);
+        image.Mutate(x => x.Resize(image.Width * 4, image.Height * 4));
+
+        using SaveFileDialog dialog = new()
 		{
-			Filter = "Bitmap (*.bmp)|*.bmp",
+			Filter = "PNG (*.png)|*.png",
 			FilterIndex = 0,
 			RestoreDirectory = true
 		};
@@ -142,8 +149,9 @@ public partial class EmulatorSurface : Form, IController
 			try
 			{
 				Monitor.Enter(updateLock);
-				File.WriteAllBytes(dialog.FileName, lastFrame);
-			}
+				using FileStream fs = new(dialog.FileName, FileMode.Create);
+                image.Save(fs, new PngEncoder());
+            }
 			finally
 			{
 				Monitor.Exit(updateLock);
@@ -198,7 +206,7 @@ public partial class EmulatorSurface : Form, IController
 		{
 			lastFrame = frameBytes;
 			using MemoryStream ms = new(frameBytes);
-			pictureBox.Image = Image.FromStream(ms);
+			pictureBox.Image = SDImage.FromStream(ms);
 		}
 		catch
 		{
