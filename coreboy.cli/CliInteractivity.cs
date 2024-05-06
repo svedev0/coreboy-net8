@@ -1,12 +1,14 @@
-﻿using coreboy.controller;
+﻿#nullable disable
+
+using coreboy.controller;
 using Button = coreboy.controller.Button;
 
 namespace coreboy.cli;
 
 public class CliInteractivity : IController
 {
-	private IButtonListener listener = null!;
 	private readonly Dictionary<ConsoleKey, Button> controls;
+	private IButtonListener listener;
 
 	public CliInteractivity()
 	{
@@ -34,7 +36,7 @@ public class CliInteractivity : IController
 
 	public void ProcessInput()
 	{
-		Button? lastButton = null;
+		Button lastButton = null;
 		var input = Console.ReadKey(true);
 
 		while (input.Key != ConsoleKey.Escape)
@@ -48,7 +50,7 @@ public class CliInteractivity : IController
 
 				listener?.OnButtonPress(button);
 
-				Button? snapshot = button;
+				Button snapshot = button;
 
 				Task.Run(() =>
 				{
