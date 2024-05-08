@@ -11,7 +11,7 @@ public class Program
 
 		Form emuSurface = new EmulatorSurface
 		{
-			Text = "coreboy-revived",
+			Text = @"coreboy-revived",
 			ClientSize = new Size(800, 600),
             AutoScaleMode = AutoScaleMode.Dpi,
 			AutoScaleDimensions = new SizeF(144F, 144F)

@@ -38,15 +38,15 @@ public partial class EmulatorSurface : Form, IController
 				{
 					DropDownItems =
 					{
-						new Tsmi("Load ROM", null, (sender, args) =>
+						new Tsmi("Load ROM", null, (_, _) =>
 						{
 							StartEmulator();
 						}),
-						new Tsmi("Pause", null, (sender, args) =>
+						new Tsmi("Pause", null, (_, _) =>
 						{
 							emulator?.TogglePause();
 						}),
-						new Tsmi("Quit", null, (sender, args) =>
+						new Tsmi("Quit", null, (_, _) =>
 						{
 							Close();
 						})
@@ -56,7 +56,7 @@ public partial class EmulatorSurface : Form, IController
 				{
 					DropDownItems =
 					{
-						new Tsmi("Screenshot", null, (sender, args) =>
+						new Tsmi("Screenshot", null, (_, _) =>
 						{
 							TakeScreenshot();
 						})
@@ -103,7 +103,7 @@ public partial class EmulatorSurface : Form, IController
 
 		KeyDown += EmulatorSurface_KeyDown!;
 		KeyUp += EmulatorSurface_KeyUp!;
-		Closed += (_, e) => { cancellationSource.Cancel(); };
+		Closed += (_, _) => { cancellationSource.Cancel(); };
 	}
 
 	private void StartEmulator()
@@ -116,33 +116,31 @@ public partial class EmulatorSurface : Form, IController
 			Task.Delay(100).Wait();
 		}
 
-		using OpenFileDialog dialog = new()
-		{
-			Filter = "ROM files (*.gb;*.gbc)|*.gb;*.gbc",
-			FilterIndex = 0,
-			RestoreDirectory = true
-		};
+		using OpenFileDialog dialog = new();
+		dialog.Filter = @"ROM files (*.gb;*.gbc)|*.gb;*.gbc";
+		dialog.FilterIndex = 0;
+		dialog.RestoreDirectory = true;
 
-		if (dialog.ShowDialog() == DialogResult.OK)
+		if (dialog.ShowDialog() != DialogResult.OK)
 		{
-			gbOptions.Rom = dialog.FileName;
-			emulator.Run(cancellationSource.Token);
+			return;
 		}
+
+		gbOptions.Rom = dialog.FileName;
+		emulator.Run(cancellationSource.Token);
 	}
 
 	private void TakeScreenshot()
 	{
 		emulator.TogglePause();
 
-        using var image = ISImage.Load(lastFrame);
+        var image = ISImage.Load(lastFrame);
         image.Mutate(x => x.Resize(image.Width * 4, image.Height * 4));
 
-        using SaveFileDialog dialog = new()
-		{
-			Filter = "PNG (*.png)|*.png",
-			FilterIndex = 0,
-			RestoreDirectory = true
-		};
+        using SaveFileDialog dialog = new();
+		dialog.Filter = @"PNG (*.png)|*.png";
+		dialog.FilterIndex = 0;
+		dialog.RestoreDirectory = true;
 
 		if (dialog.ShowDialog() == DialogResult.OK)
 		{
@@ -195,7 +193,7 @@ public partial class EmulatorSurface : Form, IController
 		pictureBox.Height = Height - menu.Height - 50;
 	}
 
-	public void UpdateDisplay(object _, byte[] frameBytes)
+	private void UpdateDisplay(object _, byte[] frameBytes)
 	{
 		if (!Monitor.TryEnter(updateLock))
 		{
@@ -207,7 +205,7 @@ public partial class EmulatorSurface : Form, IController
 			lastFrame = frameBytes;
 			using MemoryStream ms = new(frameBytes);
 			pictureBox.Image = SDImage.FromStream(ms);
-		}
+        }
 		catch
 		{
 			// YOLO
