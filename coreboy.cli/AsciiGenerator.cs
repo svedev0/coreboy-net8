@@ -5,7 +5,7 @@ using SixLabors.ImageSharp.Processing;
 
 namespace coreboy.cli;
 
-public class AsciiGenerator
+public abstract class AsciiGenerator
 {
 	private static readonly Dictionary<float, string> Map = new()
 	{
@@ -38,10 +38,11 @@ public class AsciiGenerator
 		{
 			for (int x = 0; x < image.Width; x++)
 			{
-				Rgba32 pixelVal = image[x, y];
+				var pixelVal = image[x, y];
 				string currentChar = MapToAscii(Map, pixelVal);
 				sb.Append(currentChar);
 			}
+			
 			sb.Append(Environment.NewLine);
 		}
 
@@ -52,7 +53,7 @@ public class AsciiGenerator
 	{
 		string currentChar = string.Empty;
 
-		foreach (var (key, value) in map)
+		foreach ((float key, string value) in map)
 		{
 			if (key <= pixelVal.R)
 			{

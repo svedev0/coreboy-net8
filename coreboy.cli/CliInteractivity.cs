@@ -48,14 +48,14 @@ public class CliInteractivity : IController
 					listener?.OnButtonRelease(lastButton);
 				}
 
-				listener?.OnButtonPress(button);
+				listener?.OnButtonPress(button!);
 
-				Button snapshot = button;
+				var buttonSnapshot = button;
 
 				Task.Run(() =>
 				{
 					Task.Delay(500).Wait();
-					listener?.OnButtonRelease(snapshot);
+					listener?.OnButtonRelease(buttonSnapshot!);
 				});
 
 				lastButton = button;
