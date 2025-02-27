@@ -60,7 +60,8 @@ public class WinSound : ISoundOutput
         // wait until audio is done playing this data
         while (_engine?.GetQueuedAudioLength() > BufferSize)
         {
-            Thread.Sleep(0);
+            Thread.Yield();
+            //Thread.Sleep(0);
         }
     }
 }
