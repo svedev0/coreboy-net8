@@ -145,4 +145,9 @@ public partial class MainViewModel : ObservableObject, IController
             listener.OnButtonRelease(button);
         }
     }
+
+    internal void Close()
+    {
+        cancellationSource.Cancel();
+    }
 }

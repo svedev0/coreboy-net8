@@ -58,6 +58,13 @@ public partial class MainWindow : Window
         }
     }
 
+    protected override void OnClosing(WindowClosingEventArgs e)
+    {
+        var data = DataContext as MainViewModel;
+        data.Close();
+        base.OnClosing(e);
+    }
+
     protected override void OnKeyDown(KeyEventArgs e)
     {
         var data = DataContext as MainViewModel;
