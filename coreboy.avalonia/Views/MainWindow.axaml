@@ -1,0 +1,32 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:coreboy.avalonia.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="clr-namespace:coreboy.avalonia.Views"
+        xmlns:siv="https://github.com/kekyo/SkiaImageView"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+		MinWidth="256" MinHeight="256"
+		Height="512" Width="512"		
+        x:Class="coreboy.avalonia.Views.MainWindow"
+		x:DataType="vm:MainViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="coreboy.avalonia">
+	<Design.DataContext>
+		<vm:MainViewModel />
+	</Design.DataContext>
+	<DockPanel>
+		<Menu DockPanel.Dock="Top">
+			<MenuItem Header="_File">
+				<MenuItem Header="_Open" Click="OpenFile_Click"/>
+				<MenuItem Header="_Pause" Command="{Binding PauseCommand}"/>
+				<MenuItem Header="_Screenshot" Click="ScreenShot_Click"/>
+			</MenuItem>
+		</Menu>
+		<Grid>
+			<siv:SKImageView
+			Stretch="Uniform"
+			Source="{Binding Bitmap}" />
+		</Grid>
+	</DockPanel>
+</Window>
