@@ -90,7 +90,7 @@ public partial class MainViewModel : ObservableObject, IController
 		emulator.Run(cancellationSource.Token);
 	}
 
-	public async Task ScreenShot(string path)
+	public async Task Screenshot(string path)
 	{
 		if (Bitmap == null)
 		{

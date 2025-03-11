@@ -14,7 +14,7 @@ public partial class MainWindow : Window
 		InitializeComponent();
 	}
 
-	private async void OpenFile_Click(object _, RoutedEventArgs e)
+	private async void LoadRom_Click(object _, RoutedEventArgs e)
 	{
 		IStorageProvider? storage = GetTopLevel(this)?.StorageProvider;
 		if (storage is null)
@@ -53,7 +53,7 @@ public partial class MainWindow : Window
 		}
 	}
 
-	private async void ScreenShot_Click(object sender, RoutedEventArgs e)
+	private async void Screenshot_Click(object sender, RoutedEventArgs e)
 	{
 		IStorageProvider? storage = GetTopLevel(this)?.StorageProvider;
 		if (storage is null)
@@ -81,7 +81,7 @@ public partial class MainWindow : Window
 
 		if (DataContext is MainViewModel context)
 		{
-			await context.ScreenShot(WebUtility.UrlDecode(absolutePath));
+			await context.Screenshot(WebUtility.UrlDecode(absolutePath));
 		}
 	}
 

@@ -19,10 +19,10 @@
 	</Design.DataContext>
 	<DockPanel XYFocus.NavigationModes="Disabled" KeyboardNavigation.TabNavigation="None">
 		<Menu DockPanel.Dock="Top" XYFocus.NavigationModes="Disabled" KeyboardNavigation.TabNavigation="None">
-			<MenuItem Header="_File" XYFocus.NavigationModes="Disabled" KeyboardNavigation.TabNavigation="None">
-				<MenuItem Header="_Open" Click="OpenFile_Click" XYFocus.NavigationModes="Disabled" KeyboardNavigation.TabNavigation="None"/>
+			<MenuItem Header="_Emulator" XYFocus.NavigationModes="Disabled" KeyboardNavigation.TabNavigation="None">
+				<MenuItem Header="_Load ROM" Click="LoadRom_Click" XYFocus.NavigationModes="Disabled" KeyboardNavigation.TabNavigation="None"/>
 				<MenuItem Header="_Pause" Command="{Binding PauseCommand}" XYFocus.NavigationModes="Disabled" KeyboardNavigation.TabNavigation="None"/>
-				<MenuItem Header="_Screenshot" Click="ScreenShot_Click" XYFocus.NavigationModes="Disabled" KeyboardNavigation.TabNavigation="None"/>
+				<MenuItem Header="_Screenshot" Click="Screenshot_Click" XYFocus.NavigationModes="Disabled" KeyboardNavigation.TabNavigation="None"/>
 			</MenuItem>
 		</Menu>
 		<Grid>
