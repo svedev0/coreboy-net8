@@ -24,12 +24,14 @@ bug reports, or improvements. Pull requests are welcome.
 
 ## TODO
 
-| Category    | Summary                                                        |
-| ----------- | -------------------------------------------------------------- |
-| **Task**    | Write documentation                                            |
-| **Task**    | Improve performace of animations                               |
-| **Feature** | Implement native desktop support for Linux (in progress)       |
-| **Feature** | Implement native desktop support for MacOS                     |
+| Category    | Summary                                                  |
+| ----------- | -------------------------------------------------------- |
+| **Task**    | Write documentation                                      |
+| **Task**    | Improve performace of animations                         |
+| **Feature** | Implement native desktop support for Linux (in progress) |
+| **Feature** | Implement native desktop support for MacOS               |
+| **Bug**     | Audio not working in Linux build                         |
+| **Bug**     | Uncapped frame rate in Linux build                       |
 
 ## Build & run
 
