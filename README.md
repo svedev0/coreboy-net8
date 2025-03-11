@@ -24,14 +24,21 @@ bug reports, or improvements. Pull requests are welcome.
 
 ## TODO
 
-| Category    | Summary                                                  |
-| ----------- | -------------------------------------------------------- |
-| **Task**    | Write documentation                                      |
-| **Task**    | Improve performace of animations                         |
-| **Feature** | Implement native desktop support for Linux (in progress) |
-| **Feature** | Implement native desktop support for MacOS               |
-| **Bug**     | Audio not working in Linux build                         |
-| **Bug**     | Uncapped frame rate in Linux build                       |
+| Category    | Summary                                                                           |
+| ----------- | --------------------------------------------------------------------------------- |
+| **Task**    | Write documentation                                                               |
+| **Task**    | Improve performace of animations                                                  |
+| **Task**    | Explore ways to improve scaling (clearer pixels) in Avalonia                      |
+| **Task**    | Phase out Windows Forms in favour of Avalonia for Windows [1]                     |
+| **Feature** | Implement native desktop support for Linux (in progress) [1]                      |
+| **Feature** | Implement native desktop support for MacOS [1]                                    |
+| **Feature** | Implement emulation speed control (e.g. 2x, 3x, etc. through Gameboy.TicksPerSec) |
+| **Bug**     | Audio not working in Linux build                                                  |
+| **Bug**     | Uncapped frame rate in Linux build                                                |
+
+1. Avalonia, as it is implemented right now, should be able to be built to
+multiple target platforms without making code changes using `dotnet publish`
+and the `-r` flag (e.g. with `win-x64`, `linux-x64`, etc.)
 
 ## Build & run
 
