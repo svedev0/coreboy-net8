@@ -1,0 +1,5 @@
+- [x] enable audio, maybe check here:  https://github.com/wcabus/gb-net6 or use soundflow
+	- [x] choppy but there is audio 
+- [x] avalonia frontend
+- [ ] render to just skia or blazor
+- [ ] input from code

@@ -55,7 +55,10 @@ public class BitmapDisplay : IDisplay
 	{
 		while (_doRefresh)
 		{
-			Task.Delay(1).Wait();
+            // this is stupid, cause task.delay(1) will wait for more than 1 ms on windows, this is better
+            // don't ask how I know this, I hate this
+            //Task.Delay(1).Wait(); -> this is bad, fk me
+            Thread.Yield();
 		}
 	}
 
@@ -69,7 +72,7 @@ public class BitmapDisplay : IDisplay
 		{
 			if (!_doRefresh)
 			{
-				Task.Delay(1, token).Wait(token);
+				Thread.Yield();
 				continue;
 			}
 
