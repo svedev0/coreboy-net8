@@ -1,5 +1,3 @@
-#nullable disable
-
 using coreboy.gpu;
 
 namespace coreboy.gui;
@@ -11,7 +9,7 @@ public class BitmapDisplay : IDisplay
 	public static readonly int[] Colors = [0xe6f8da, 0x99c886, 0x437969, 0x051f2a];
 
 	public bool Enabled { get; set; }
-	public event FrameProducedEventHandler OnFrameProduced;
+	public event FrameProducedEventHandler? OnFrameProduced;
 
 	private readonly int[] _rgb;
 	private bool _doRefresh;
@@ -37,10 +35,10 @@ public class BitmapDisplay : IDisplay
 
 	public static int TranslateGbcRgb(int gbcRgb)
 	{
-		var r = (gbcRgb >> 0) & 0x1f;
-		var g = (gbcRgb >> 5) & 0x1f;
-		var b = (gbcRgb >> 10) & 0x1f;
-		var result = (r * 8) << 16;
+		int r = (gbcRgb >> 0) & 0x1f;
+		int g = (gbcRgb >> 5) & 0x1f;
+		int b = (gbcRgb >> 10) & 0x1f;
+		int result = (r * 8) << 16;
 		result |= (g * 8) << 8;
 		result |= (b * 8) << 0;
 		return result;
@@ -55,23 +53,25 @@ public class BitmapDisplay : IDisplay
 	{
 		while (_doRefresh)
 		{
-            // this is stupid, cause task.delay(1) will wait for more than 1 ms on windows, this is better
-            // don't ask how I know this, I hate this
-            //Task.Delay(1).Wait(); -> this is bad, fk me
-            Thread.Yield();
+			// Task.Delay(1) will wait for more than 1 ms on Windows.
+			// Thread.Yield() is better.
+			// Task.Delay(1).Wait();
+			Thread.Yield();
 		}
 	}
 
 	public void Run(CancellationToken token)
 	{
 		SetRefreshFlag(false);
-
 		Enabled = true;
 
 		while (!token.IsCancellationRequested)
 		{
 			if (!_doRefresh)
 			{
+				// Task.Delay(1) will wait for more than 1 ms on Windows.
+				// Thread.Yield() is better.
+				// Task.Delay(1, token).Wait(token);
 				Thread.Yield();
 				continue;
 			}

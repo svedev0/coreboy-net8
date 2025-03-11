@@ -56,9 +56,9 @@ public static class GameboyDisplayFrameHelperExtensions
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static (int, int, int) ToRgb(this int pixel)
 	{
-		var b = pixel & 255;
-		var g = (pixel >> 8) & 255;
-		var r = (pixel >> 16) & 255;
+		int b = pixel & 255;
+		int g = (pixel >> 8) & 255;
+		int r = (pixel >> 16) & 255;
 		return (r, g, b);
 	}
 }
