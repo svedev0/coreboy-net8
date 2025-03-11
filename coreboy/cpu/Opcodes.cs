@@ -1,5 +1,3 @@
-#nullable disable
-
 using coreboy.cpu.opcode;
 
 using InvalidOpE = System.InvalidOperationException;
@@ -8,30 +6,33 @@ namespace coreboy.cpu;
 
 public class Opcodes
 {
-	public List<Opcode> Commands { get; }
-	public List<Opcode> ExtCommands { get; }
+	public List<Opcode?> Commands { get; }
+	public List<Opcode?> ExtCommands { get; }
 
 	public Opcodes()
 	{
-		var opcodes = new OpcodeBuilder[0x100];
-		var extOpcodes = new OpcodeBuilder[0x100];
+		OpcodeBuilder[] opcodes = new OpcodeBuilder[0x100];
+		OpcodeBuilder[] extOpcodes = new OpcodeBuilder[0x100];
 
 		RegCmd(opcodes, 0x00, "NOP");
 
-		var regKvps01 = OpcodesForValues(0x01, 0x10, "BC", "DE", "HL", "SP");
-		foreach (var kvp in regKvps01)
+		Dictionary<int, string> regKvps01 = OpcodesForValues(
+			0x01, 0x10, "BC", "DE", "HL", "SP");
+		foreach (KeyValuePair<int, string> kvp in regKvps01)
 		{
 			RegLoad(opcodes, kvp.Key, kvp.Value, "d16");
 		}
 
-		var regKvps02 = OpcodesForValues(0x02, 0x10, "(BC)", "(DE)");
-		foreach (var kvp in regKvps02)
+		Dictionary<int, string> regKvps02 = OpcodesForValues(
+			0x02, 0x10, "(BC)", "(DE)");
+		foreach (KeyValuePair<int, string> kvp in regKvps02)
 		{
 			RegLoad(opcodes, kvp.Key, kvp.Value, "A");
 		}
 
-		var regKvps03 = OpcodesForValues(0x03, 0x10, "BC", "DE", "HL", "SP");
-		foreach (var kvp in regKvps03)
+		Dictionary<int, string> regKvps03 = OpcodesForValues(
+			0x03, 0x10, "BC", "DE", "HL", "SP");
+		foreach (KeyValuePair<int, string> kvp in regKvps03)
 		{
 			RegCmd(opcodes, kvp, "INC {}")
 				.Load(kvp.Value)
@@ -39,9 +40,9 @@ public class Opcodes
 				.Store(kvp.Value);
 		}
 
-		var regKvps04 = OpcodesForValues(
+		Dictionary<int, string> regKvps04 = OpcodesForValues(
 			0x04, 0x08, "B", "C", "D", "E", "H", "L", "(HL)", "A");
-		foreach (var kvp in regKvps04)
+		foreach (KeyValuePair<int, string> kvp in regKvps04)
 		{
 			RegCmd(opcodes, kvp, "INC {}")
 				.Load(kvp.Value)
@@ -49,9 +50,9 @@ public class Opcodes
 				.Store(kvp.Value);
 		}
 
-		var regKvps05 = OpcodesForValues(
+		Dictionary<int, string> regKvps05 = OpcodesForValues(
 			0x05, 0x08, "B", "C", "D", "E", "H", "L", "(HL)", "A");
-		foreach (var kvp in regKvps05)
+		foreach (KeyValuePair<int, string> kvp in regKvps05)
 		{
 			RegCmd(opcodes, kvp, "DEC {}")
 				.Load(kvp.Value)
@@ -59,15 +60,16 @@ public class Opcodes
 				.Store(kvp.Value);
 		}
 
-		var regKvps06 = OpcodesForValues(
+		Dictionary<int, string> regKvps06 = OpcodesForValues(
 			0x06, 0x08, "B", "C", "D", "E", "H", "L", "(HL)", "A");
-		foreach (var kvp in regKvps06)
+		foreach (KeyValuePair<int, string> kvp in regKvps06)
 		{
 			RegLoad(opcodes, kvp.Key, kvp.Value, "d8");
 		}
 
-		var regKvps07 = OpcodesForValues(0x07, 0x08, "RLC", "RRC", "RL", "RR");
-		foreach (var kvp in regKvps07)
+		Dictionary<int, string> regKvps07 = OpcodesForValues(
+			0x07, 0x08, "RLC", "RRC", "RL", "RR");
+		foreach (KeyValuePair<int, string> kvp in regKvps07)
 		{
 			RegCmd(opcodes, kvp, kvp.Value + "A")
 				.Load("A")
@@ -78,8 +80,9 @@ public class Opcodes
 
 		RegLoad(opcodes, 0x08, "(a16)", "SP");
 
-		var regKvps09 = OpcodesForValues(0x09, 0x10, "BC", "DE", "HL", "SP");
-		foreach (var kvp in regKvps09)
+		Dictionary<int, string> regKvps09 = OpcodesForValues(
+			0x09, 0x10, "BC", "DE", "HL", "SP");
+		foreach (KeyValuePair<int, string> kvp in regKvps09)
 		{
 			RegCmd(opcodes, kvp, "ADD HL,{}")
 				.Load("HL")
@@ -87,14 +90,16 @@ public class Opcodes
 				.Store("HL");
 		}
 
-		var regKvps0a = OpcodesForValues(0x0a, 0x10, "(BC)", "(DE)");
-		foreach (var kvp in regKvps0a)
+		Dictionary<int, string> regKvps0a = OpcodesForValues(
+			0x0a, 0x10, "(BC)", "(DE)");
+		foreach (KeyValuePair<int, string> kvp in regKvps0a)
 		{
 			RegLoad(opcodes, kvp.Key, "A", kvp.Value);
 		}
 
-		var regKvps0b = OpcodesForValues(0x0b, 0x10, "BC", "DE", "HL", "SP");
-		foreach (var kvp in regKvps0b)
+		Dictionary<int, string> regKvps0b = OpcodesForValues(
+			0x0b, 0x10, "BC", "DE", "HL", "SP");
+		foreach (KeyValuePair<int, string> kvp in regKvps0b)
 		{
 			RegCmd(opcodes, kvp, "DEC {}")
 				.Load(kvp.Value)
@@ -109,8 +114,9 @@ public class Opcodes
 			.Alu("ADD", "r8")
 			.Store("PC");
 
-		var regKvps20 = OpcodesForValues(0x20, 0x08, "NZ", "Z", "NC", "C");
-		foreach (var kvp in regKvps20)
+		Dictionary<int, string> regKvps20 = OpcodesForValues(
+			0x20, 0x08, "NZ", "Z", "NC", "C");
+		foreach (KeyValuePair<int, string> kvp in regKvps20)
 		{
 			RegCmd(opcodes, kvp, "JR {},r8")
 				.Load("PC")
@@ -155,13 +161,13 @@ public class Opcodes
 			.Alu("CCF")
 			.Store("A");
 
-		var regKvps40 = OpcodesForValues(
+		Dictionary<int, string> regKvps40 = OpcodesForValues(
 			0x40, 0x08, "B", "C", "D", "E", "H", "L", "(HL)", "A");
-		foreach (var kvp in regKvps40)
+		foreach (KeyValuePair<int, string> kvp in regKvps40)
 		{
-			var regKvps = OpcodesForValues(
+			Dictionary<int, string> regKvps = OpcodesForValues(
 				kvp.Key, 0x01, "B", "C", "D", "E", "H", "L", "(HL)", "A");
-			foreach (var kvp2 in regKvps)
+			foreach (KeyValuePair<int, string> kvp2 in regKvps)
 			{
 				if (kvp2.Key == 0x76)
 				{
@@ -174,13 +180,13 @@ public class Opcodes
 
 		RegCmd(opcodes, 0x76, "HALT");
 
-		var regKvps80 = OpcodesForValues(
+		Dictionary<int, string> regKvps80 = OpcodesForValues(
 			0x80, 0x08, "ADD", "ADC", "SUB", "SBC", "AND", "XOR", "OR", "CP");
-		foreach (var kvp in regKvps80)
+		foreach (KeyValuePair<int, string> kvp in regKvps80)
 		{
-			var regKvps = OpcodesForValues(
+			Dictionary<int, string> regKvps = OpcodesForValues(
 				kvp.Key, 0x01, "B", "C", "D", "E", "H", "L", "(HL)", "A");
-			foreach (var kvp2 in regKvps)
+			foreach (KeyValuePair<int, string> kvp2 in regKvps)
 			{
 				RegCmd(opcodes, kvp2, kvp.Value + " {}")
 					.Load("A")
@@ -189,8 +195,9 @@ public class Opcodes
 			}
 		}
 
-		var regKvpsC0 = OpcodesForValues(0xc0, 0x08, "NZ", "Z", "NC", "C");
-		foreach (var kvp in regKvpsC0)
+		Dictionary<int, string> regKvpsC0 = OpcodesForValues(
+			0xc0, 0x08, "NZ", "Z", "NC", "C");
+		foreach (KeyValuePair<int, string> kvp in regKvpsC0)
 		{
 			RegCmd(opcodes, kvp, "RET {}")
 				.ExtraCycle()
@@ -200,16 +207,18 @@ public class Opcodes
 				.Store("PC");
 		}
 
-		var regKvpsC1 = OpcodesForValues(0xc1, 0x10, "BC", "DE", "HL", "AF");
-		foreach (var kvp in regKvpsC1)
+		Dictionary<int, string> regKvpsC1 = OpcodesForValues(
+			0xc1, 0x10, "BC", "DE", "HL", "AF");
+		foreach (KeyValuePair<int, string> kvp in regKvpsC1)
 		{
 			RegCmd(opcodes, kvp, "POP {}")
 				.Pop()
 				.Store(kvp.Value);
 		}
 
-		var regKvpsC2 = OpcodesForValues(0xc2, 0x08, "NZ", "Z", "NC", "C");
-		foreach (var kvp in regKvpsC2)
+		Dictionary<int, string> regKvpsC2 = OpcodesForValues(
+			0xc2, 0x08, "NZ", "Z", "NC", "C");
+		foreach (KeyValuePair<int, string> kvp in regKvpsC2)
 		{
 			RegCmd(opcodes, kvp, "JP {},a16")
 				.Load("a16")
@@ -223,8 +232,9 @@ public class Opcodes
 			.Store("PC")
 			.ExtraCycle();
 
-		var regKvpsC4 = OpcodesForValues(0xc4, 0x08, "NZ", "Z", "NC", "C");
-		foreach (var kvp in regKvpsC4)
+		Dictionary<int, string> regKvpsC4 = OpcodesForValues(
+			0xc4, 0x08, "NZ", "Z", "NC", "C");
+		foreach (KeyValuePair<int, string> kvp in regKvpsC4)
 		{
 			RegCmd(opcodes, kvp, "CALL {},a16")
 				.ProceedIf(kvp.Value)
@@ -235,8 +245,9 @@ public class Opcodes
 				.Store("PC");
 		}
 
-		var regKvpsC5 = OpcodesForValues(0xc5, 0x10, "BC", "DE", "HL", "AF");
-		foreach (var kvp in regKvpsC5)
+		Dictionary<int, string> regKvpsC5 = OpcodesForValues(
+			0xc5, 0x10, "BC", "DE", "HL", "AF");
+		foreach (KeyValuePair<int, string> kvp in regKvpsC5)
 		{
 			RegCmd(opcodes, kvp, "PUSH {}")
 				.ExtraCycle()
@@ -244,9 +255,9 @@ public class Opcodes
 				.Push();
 		}
 
-		var regKvpsC6 = OpcodesForValues(
+		Dictionary<int, string> regKvpsC6 = OpcodesForValues(
 			0xc6, 0x08, "ADD", "ADC", "SUB", "SBC", "AND", "XOR", "OR", "CP");
-		foreach (var kvp in regKvpsC6)
+		foreach (KeyValuePair<int, string> kvp in regKvpsC6)
 		{
 			RegCmd(opcodes, kvp, kvp.Value + " d8")
 				.Load("A")
@@ -330,13 +341,13 @@ public class Opcodes
 		RegLoad(opcodes, 0xf9, "SP", "HL")
 			.ExtraCycle();
 
-		var regKvps00 = OpcodesForValues(
+		Dictionary<int, string> regKvps00 = OpcodesForValues(
 			0x00, 0x08, "RLC", "RRC", "RL", "RR", "SLA", "SRA", "SWAP", "SRL");
-		foreach (var kvp in regKvps00)
+		foreach (KeyValuePair<int, string> kvp in regKvps00)
 		{
-			var regKvps = OpcodesForValues(
+			Dictionary<int, string> regKvps = OpcodesForValues(
 				kvp.Key, 0x01, "B", "C", "D", "E", "H", "L", "(HL)", "A");
-			foreach (var kvp2 in regKvps)
+			foreach (KeyValuePair<int, string> kvp2 in regKvps)
 			{
 				RegCmd(extOpcodes, kvp2, kvp.Value + " {}")
 					.Load(kvp2.Value)
@@ -345,15 +356,16 @@ public class Opcodes
 			}
 		}
 
-		var regKvps4040 = OpcodesForValues(0x40, 0x40, "BIT", "RES", "SET");
-		foreach (var kvp in regKvps4040)
+		Dictionary<int, string> regKvps4040 = OpcodesForValues(
+			0x40, 0x40, "BIT", "RES", "SET");
+		foreach (KeyValuePair<int, string> kvp in regKvps4040)
 		{
-			for (var b = 0; b < 0x08; b++)
+			for (int b = 0; b < 0x08; b++)
 			{
 				int bit = kvp.Key + b * 0x08;
-				var regKvps = OpcodesForValues(
+				Dictionary<int, string> regKvps = OpcodesForValues(
 					bit, 0x01, "B", "C", "D", "E", "H", "L", "(HL)", "A");
-				foreach (var kvp2 in regKvps)
+				foreach (KeyValuePair<int, string> kvp2 in regKvps)
 				{
 					if ("BIT".Equals(kvp.Value) &&
 						"(HL)".Equals(kvp2.Value))
@@ -372,8 +384,8 @@ public class Opcodes
 			}
 		}
 
-		List<Opcode> commands = new(0x100);
-		List<Opcode> extCommands = new(0x100);
+		List<Opcode?> commands = new(0x100);
+		List<Opcode?> extCommands = new(0x100);
 
 		commands.AddRange(opcodes.Select(b => b?.Build()));
 		extCommands.AddRange(extOpcodes.Select(b => b?.Build()));
@@ -403,7 +415,7 @@ public class Opcodes
 				$"Opcode {opcode:X} already exists: {commands[opcode]}");
 		}
 
-		var builder = new OpcodeBuilder(opcode, label);
+		OpcodeBuilder builder = new(opcode, label);
 		commands[opcode] = builder;
 		return builder;
 	}
@@ -414,7 +426,7 @@ public class Opcodes
 		Dictionary<int, string> map = [];
 		int i = start;
 
-		foreach (var e in values)
+		foreach (string e in values)
 		{
 			map.Add(i, e);
 			i += step;

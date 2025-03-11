@@ -65,7 +65,7 @@ public class OpcodeBuilder(int opcode, string label)
 
 	public OpcodeBuilder Load(string source)
 	{
-		var arg = Argument.Parse(source);
+		Argument arg = Argument.Parse(source);
 		lastDataType = arg.DataType;
 		_ops.Add(new LoadOp(arg));
 		return this;
@@ -163,7 +163,7 @@ public class OpcodeBuilder(int opcode, string label)
 
 	public OpcodeBuilder Store(string target)
 	{
-		var arg = Argument.Parse(target);
+		Argument arg = Argument.Parse(target);
 
 		if (lastDataType == DataType.D16 && arg.Label == "(a16)")
 		{
@@ -274,7 +274,7 @@ public class OpcodeBuilder(int opcode, string label)
 
 	public OpcodeBuilder Push()
 	{
-		var dec = aluFunctions.GetFunction("DEC", DataType.D16);
+		IntRegistryFunc dec = aluFunctions.GetFunction("DEC", DataType.D16);
 		_ops.Add(new PushOp1(dec));
 		_ops.Add(new PushOp2(dec));
 		return this;
@@ -320,7 +320,7 @@ public class OpcodeBuilder(int opcode, string label)
 		public override int Execute(
 			Registers registers, IAddressSpace addressSpace, int[] args, int context)
 		{
-			var msb = addressSpace.GetByte(registers.SP);
+			int msb = addressSpace.GetByte(registers.SP);
 			registers.SP = _func(registers.Flags, registers.SP);
 			return context | (msb << 8);
 		}
@@ -344,7 +344,7 @@ public class OpcodeBuilder(int opcode, string label)
 
 	public OpcodeBuilder Pop()
 	{
-		var inc = aluFunctions.GetFunction("INC", DataType.D16);
+		IntRegistryFunc inc = aluFunctions.GetFunction("INC", DataType.D16);
 		lastDataType = DataType.D16;
 		_ops.Add(new PopOp1(inc));
 		_ops.Add(new PopOp2(inc));
@@ -385,8 +385,8 @@ public class OpcodeBuilder(int opcode, string label)
 
 	public OpcodeBuilder Alu(string operation, string argument)
 	{
-		var arg = Argument.Parse(argument);
-		var func = aluFunctions.GetFunction(operation, lastDataType, arg.DataType);
+		Argument arg = Argument.Parse(argument);
+		BiIntRegistryFunc func = aluFunctions.GetFunction(operation, lastDataType, arg.DataType);
 		_ops.Add(new AluOp1(func, arg, operation, lastDataType));
 
 		if (lastDataType == DataType.D16)
@@ -417,7 +417,7 @@ public class OpcodeBuilder(int opcode, string label)
 
 	public OpcodeBuilder Alu(string operation, int d8Value)
 	{
-		var func = aluFunctions.GetFunction(operation, lastDataType, DataType.D8);
+		BiIntRegistryFunc func = aluFunctions.GetFunction(operation, lastDataType, DataType.D8);
 		_ops.Add(new AluOp2(func, operation, d8Value));
 
 		if (lastDataType == DataType.D16)
@@ -467,7 +467,7 @@ public class OpcodeBuilder(int opcode, string label)
 
 	public OpcodeBuilder Alu(string operation)
 	{
-		var func = aluFunctions.GetFunction(operation, lastDataType);
+		IntRegistryFunc func = aluFunctions.GetFunction(operation, lastDataType);
 		_ops.Add(new AluOp3(func, operation, lastDataType));
 
 		if (lastDataType == DataType.D16)
@@ -524,7 +524,7 @@ public class OpcodeBuilder(int opcode, string label)
 		{
 			int value = addressSpace.GetByte(registers.HL);
 
-			var flags = registers.Flags;
+			Flags flags = registers.Flags;
 			flags.SetN(false);
 			flags.SetH(true);
 
@@ -614,7 +614,6 @@ public class OpcodeBuilder(int opcode, string label)
 	private class ExtraCycleOp : Op
 	{
 		public override bool ReadsMemory() => true;
-
 		public override string ToString() => "wait cycle";
 	}
 
@@ -627,7 +626,6 @@ public class OpcodeBuilder(int opcode, string label)
 	private class ForceFinishOp : Op
 	{
 		public override bool ForceFinishCycle() => true;
-
 		public override string ToString() => "finish cycle";
 	}
 

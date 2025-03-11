@@ -1,5 +1,3 @@
-#nullable disable
-
 using coreboy.cpu.op;
 using coreboy.cpu.opcode;
 using coreboy.gpu;
@@ -31,7 +29,7 @@ public class Cpu(
 	SpeedMode speedMode)
 {
 	public Registers Registers { get; set; } = new Registers();
-	public Opcode CurrentOpcode { get; private set; }
+	public Opcode? CurrentOpcode { get; private set; }
 	public State State { get; private set; } = State.OPCODE;
 
 	private readonly IAddressSpace _addressSpace = addressSpace;
@@ -43,7 +41,7 @@ public class Cpu(
 	private int opcode1;
 	private int opcode2;
 	private readonly int[] operand = new int[2];
-	private List<Op> ops;
+	private List<Op>? ops;
 	private int operandIndex;
 	private int opIndex;
 
@@ -51,7 +49,7 @@ public class Cpu(
 	private int interruptFlag;
 	private int interruptEnabled;
 
-	private InterruptManager.InterruptType requestedInt;
+	private InterruptManager.InterruptType? requestedInt;
 
 	private int clockCycle;
 	private bool haltBugMode;
@@ -168,7 +166,7 @@ public class Cpu(
 					break;
 
 				case State.OPERAND:
-					while (operandIndex < CurrentOpcode.Length)
+					while (operandIndex < CurrentOpcode?.Length)
 					{
 						if (accessedMemory)
 						{
@@ -180,7 +178,15 @@ public class Cpu(
 						Registers.IncrementPc();
 					}
 
-					ops = [.. CurrentOpcode.Ops];
+					if (CurrentOpcode != null)
+					{
+						ops = [.. CurrentOpcode.Ops];
+					}
+					else
+					{
+						ops = [];
+					}
+
 					State = State.RUNNING;
 					break;
 
@@ -214,9 +220,9 @@ public class Cpu(
 						}
 					}
 
-					if (opIndex < ops.Count)
+					if (opIndex < ops?.Count)
 					{
-						var op = ops[opIndex];
+						Op op = ops[opIndex];
 						bool opAccessesMemory = op.ReadsMemory() || op.WritesMemory();
 
 						if (accessedMemory && opAccessesMemory)
@@ -226,7 +232,8 @@ public class Cpu(
 
 						opIndex++;
 
-						var corruptionType = op.CausesOemBug(Registers, opContext);
+						SpriteBug.CorruptionType? corruptionType = op.CausesOemBug(
+							Registers, opContext);
 
 						if (corruptionType != null)
 						{
@@ -254,7 +261,7 @@ public class Cpu(
 						}
 					}
 
-					if (opIndex >= ops.Count)
+					if (opIndex >= ops?.Count)
 					{
 						State = State.OPCODE;
 						operandIndex = 0;
@@ -317,7 +324,7 @@ public class Cpu(
 				break;
 
 			case State.IRQ_JUMP:
-				Registers.PC = requestedInt.Handler;
+				Registers.PC = requestedInt?.Handler ?? 0;
 				requestedInt = null;
 				State = State.OPCODE;
 				break;
@@ -332,7 +339,6 @@ public class Cpu(
 		}
 
 		int stat = _addressSpace.GetByte(GpuRegister.Stat.Address);
-
 		if ((stat & 0b11) == (int)Gpu.Mode.OamSearch &&
 			_gpu.GetTicksInLine() < 79)
 		{

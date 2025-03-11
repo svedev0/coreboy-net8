@@ -1,5 +1,3 @@
-#nullable disable
-
 using InvalidOpE = System.InvalidOperationException;
 
 namespace coreboy.cpu.op;
@@ -116,8 +114,8 @@ public class Argument(
 		];
 	}
 
-	private Func<Registers, IAddressSpace, int[], int> _readFunc;
-	private Action<Registers, IAddressSpace, int[], int> _writeAction;
+	private Func<Registers, IAddressSpace, int[], int>? _readFunc;
+	private Action<Registers, IAddressSpace, int[], int>? _writeAction;
 
 	public Argument(string label) : this(label, 0, false, DataType.D8)
 	{
@@ -132,20 +130,26 @@ public class Argument(
 		return this;
 	}
 
-	public int Read(Registers registers, IAddressSpace addressSpace, int[] args)
+	public int Read(Registers regs, IAddressSpace addrSpace, int[] args)
 	{
-		return _readFunc(registers, addressSpace, args);
+		if (_readFunc is null)
+		{
+			return 0;
+		}
+		return _readFunc(regs, addrSpace, args);
 	}
 
-	public void Write(
-		Registers registers, IAddressSpace addressSpace, int[] args, int value)
+	public void Write(Registers regs, IAddressSpace addrSpace, int[] args, int value)
 	{
-		_writeAction(registers, addressSpace, args, value);
+		if (_writeAction != null)
+		{
+			_writeAction(regs, addrSpace, args, value);
+		}
 	}
 
 	public static Argument Parse(string argument)
 	{
-		foreach (var arg in Values)
+		foreach (Argument arg in Values)
 		{
 			if (arg.Label.Equals(argument))
 			{
