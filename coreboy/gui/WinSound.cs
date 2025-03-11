@@ -60,8 +60,8 @@ public class WinSound : ISoundOutput
 		// Wait until engine is done playing current audio data
 		while (_engine?.GetQueuedAudioLength() > BufferSize)
 		{
+			// Task.Delay(1) waits longer than 1 ms on Windows. Thread.Yield() is better.
 			Thread.Yield();
-			//Thread.Sleep(0);
 		}
 	}
 }

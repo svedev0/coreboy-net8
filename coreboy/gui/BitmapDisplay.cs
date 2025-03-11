@@ -53,9 +53,7 @@ public class BitmapDisplay : IDisplay
 	{
 		while (_doRefresh)
 		{
-			// Task.Delay(1) will wait for more than 1 ms on Windows.
-			// Thread.Yield() is better.
-			// Task.Delay(1).Wait();
+			// Task.Delay(1) waits longer than 1 ms on Windows. Thread.Yield() is better.
 			Thread.Yield();
 		}
 	}
@@ -69,9 +67,7 @@ public class BitmapDisplay : IDisplay
 		{
 			if (!_doRefresh)
 			{
-				// Task.Delay(1) will wait for more than 1 ms on Windows.
-				// Thread.Yield() is better.
-				// Task.Delay(1, token).Wait(token);
+				// Task.Delay(1) waits longer than 1 ms on Windows. Thread.Yield() is better.
 				Thread.Yield();
 				continue;
 			}
