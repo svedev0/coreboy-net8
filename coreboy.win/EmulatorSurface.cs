@@ -134,7 +134,7 @@ public partial class EmulatorSurface : Form, IController
 	{
 		emulator.TogglePause();
 
-        var image = ISImage.Load(lastFrame);
+		ISImage image = ISImage.Load(lastFrame);
         image.Mutate(x => x.Resize(image.Width * 4, image.Height * 4));
 
         using SaveFileDialog dialog = new();
@@ -161,7 +161,7 @@ public partial class EmulatorSurface : Form, IController
 
 	private void EmulatorSurface_KeyDown(object sender, KeyEventArgs e)
 	{
-		if (controls.TryGetValue(e.KeyCode, out var button))
+		if (controls.TryGetValue(e.KeyCode, out Button button))
 		{
 			listener.OnButtonPress(button);
 		}
@@ -169,7 +169,7 @@ public partial class EmulatorSurface : Form, IController
 
 	private void EmulatorSurface_KeyUp(object sender, KeyEventArgs e)
 	{
-		if (controls.TryGetValue(e.KeyCode, out var button))
+		if (controls.TryGetValue(e.KeyCode, out Button button))
 		{
 			listener.OnButtonRelease(button);
 		}
