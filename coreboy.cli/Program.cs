@@ -7,7 +7,7 @@ public class Program
 	static void Main(string[] args)
 	{
 		CancellationTokenSource cancellation = new();
-		var options = GameboyOptions.Parse(args);
+		GameboyOptions options = GameboyOptions.Parse(args);
 		Emulator emulator = new(options);
 
 		if (!options.RomSpecified)

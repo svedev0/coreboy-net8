@@ -29,7 +29,7 @@ public abstract class AsciiGenerator
 
 	public static string GenerateFrame(byte[] frameBytes)
 	{
-		using var image = Image.Load<Rgba32>(frameBytes);
+		using Image<Rgba32> image = Image.Load<Rgba32>(frameBytes);
 		image.Mutate(x => x.Resize(160, 72));
 
 		StringBuilder sb = new();
@@ -38,7 +38,7 @@ public abstract class AsciiGenerator
 		{
 			for (int x = 0; x < image.Width; x++)
 			{
-				var pixelVal = image[x, y];
+				Rgba32 pixelVal = image[x, y];
 				string currentChar = MapToAscii(Map, pixelVal);
 				sb.Append(currentChar);
 			}
