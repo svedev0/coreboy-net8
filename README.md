@@ -14,8 +14,8 @@ to be compatible with .NET 8 and most of the original code has been refactored
 and/or rewritten in order to ensure compatibility and modern best practices.
 
 Some sacrifices have been made in order to increase velocity. For instance,
-native desktop support for Linux and MacOS have been removed temporarily but
-are planned to be reimplemented in a modern way in the future.
+native desktop support for Linux and MacOS were temporarily cut but are now
+being implemented (at least for Linux).
 
 ## Contributing
 
@@ -27,8 +27,24 @@ bug reports, or improvements. Pull requests are welcome.
 | Category    | Summary                                                        |
 | ----------- | -------------------------------------------------------------- |
 | **Task**    | Write documentation                                            |
-| **Task**    | Replace Windows Forms with a modern desktop framework          |
 | **Task**    | Improve performace of animations                               |
-| **Feature** | Implement native desktop support for Linux                     |
+| **Feature** | Implement native desktop support for Linux (in progress)       |
 | **Feature** | Implement native desktop support for MacOS                     |
-| **Bug**     | Fix bug where some sprites flicker/lag behind in certain games |
+
+## Build & run
+
+### Windows
+
+1. Clone this repo
+2. Run: `cd coreboy-net8`
+3. Run: `dotnet restore`
+4. Run: `dotnet build coreboy.win -c Release -r win-x64`
+5. Run: `.\coreboy.win\bin\Release\net8.0-windows\win-x64\coreboy.win.exe`
+
+### Linux
+
+1. Clone this repo
+2. Run: `cd coreboy-net8`
+3. Run: `dotnet restore`
+4. Run: `dotnet build coreboy.avalonia.Desktop -c Release -r linux-x64`
+5. Run: `./coreboy.avalonia.Desktop/bin/Release/net8.0/linux-x64/coreboy.avalonia.Desktop`
