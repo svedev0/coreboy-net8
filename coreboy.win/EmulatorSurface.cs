@@ -1,6 +1,4 @@
-﻿#nullable disable
-
-using coreboy.controller;
+﻿using coreboy.controller;
 using coreboy.gui;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.Processing;
@@ -13,7 +11,7 @@ namespace coreboy.win;
 
 public partial class EmulatorSurface : Form, IController
 {
-	private IButtonListener listener;
+	private IButtonListener? listener;
 
 	private byte[] lastFrame = [];
 	private readonly MenuStrip menu;
@@ -161,17 +159,17 @@ public partial class EmulatorSurface : Form, IController
 
 	private void EmulatorSurface_KeyDown(object sender, KeyEventArgs e)
 	{
-		if (controls.TryGetValue(e.KeyCode, out Button button))
+		if (controls.TryGetValue(e.KeyCode, out Button? button))
 		{
-			listener.OnButtonPress(button);
+			listener?.OnButtonPress(button);
 		}
 	}
 
 	private void EmulatorSurface_KeyUp(object sender, KeyEventArgs e)
 	{
-		if (controls.TryGetValue(e.KeyCode, out Button button))
+		if (controls.TryGetValue(e.KeyCode, out Button? button))
 		{
-			listener.OnButtonRelease(button);
+			listener?.OnButtonRelease(button);
 		}
 	}
 
