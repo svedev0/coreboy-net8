@@ -1,5 +1,3 @@
-#nullable disable
-
 using coreboy.cpu;
 using coreboy.gpu.phase;
 using coreboy.memory;
@@ -17,7 +15,7 @@ public class Gpu : IAddressSpace
 	}
 
 	private readonly IAddressSpace _vRam0;
-	private readonly IAddressSpace _vRam1;
+	private readonly IAddressSpace? _vRam1;
 	private readonly IAddressSpace _oamRam;
 	private readonly IDisplay _display;
 	private readonly InterruptManager _intManager;
@@ -74,7 +72,7 @@ public class Gpu : IAddressSpace
 		_display = display;
 	}
 
-	private IAddressSpace GetAddressSpace(int address)
+	private IAddressSpace? GetAddressSpace(int address)
 	{
 		if (_vRam0.Accepts(address))
 		{
@@ -111,7 +109,7 @@ public class Gpu : IAddressSpace
 
 	private IAddressSpace GetVideoRam()
 	{
-		if (_gbc && (_memRegs.Get(GpuRegister.Vbk) & 1) == 1)
+		if (_gbc && _vRam1 != null && (_memRegs.Get(GpuRegister.Vbk) & 1) == 1)
 		{
 			return _vRam1;
 		}
@@ -132,8 +130,7 @@ public class Gpu : IAddressSpace
 			return;
 		}
 
-		var space = GetAddressSpace(address);
-
+		IAddressSpace? space = GetAddressSpace(address);
 		if (space == _lcdc)
 		{
 			SetLcdc(value);
@@ -150,8 +147,7 @@ public class Gpu : IAddressSpace
 			return GetStat();
 		}
 
-		var space = GetAddressSpace(address);
-
+		IAddressSpace? space = GetAddressSpace(address);
 		if (space == null)
 		{
 			return 0xff;
@@ -167,17 +163,13 @@ public class Gpu : IAddressSpace
 
 	public Mode? Tick()
 	{
-		if (!lcdEnabled)
+		if (!lcdEnabled && lcdEnabledDelay != -1)
 		{
-			if (lcdEnabledDelay != -1)
+			lcdEnabledDelay--;
+			if (lcdEnabledDelay == 0)
 			{
-				lcdEnabledDelay--;
-
-				if (lcdEnabledDelay == 0)
-				{
-					_display.Enabled = true;
-					lcdEnabled = true;
-				}
+				_display.Enabled = true;
+				lcdEnabled = true;
 			}
 		}
 

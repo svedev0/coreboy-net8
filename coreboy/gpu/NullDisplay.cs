@@ -1,5 +1,3 @@
-#nullable disable
-
 namespace coreboy.gpu;
 
 public class NullDisplay : IDisplay
