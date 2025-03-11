@@ -124,7 +124,7 @@ public class Sound : IAddressSpace
 			return;
 		}
 
-		var sm = GetAddressSpace(address) ??
+		IAddressSpace sm = GetAddressSpace(address) ??
 			throw new ArgumentException("Invalid address");
 
 		sm.SetByte(address, value);
@@ -155,7 +155,7 @@ public class Sound : IAddressSpace
 
 	private int GetUnmaskedByte(int address)
 	{
-		var sm = GetAddressSpace(address) ??
+		IAddressSpace sm = GetAddressSpace(address) ??
 			throw new ArgumentException("Invalid address");
 
 		return sm.GetByte(address);
