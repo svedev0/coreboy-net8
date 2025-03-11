@@ -52,7 +52,7 @@ public class Mbc1 : IAddressSpace
 	public bool Accepts(int address)
 	{
 		return (address >= 0x0000 && address < 0x8000) ||
-				(address >= 0xa000 && address < 0xc000);
+			(address >= 0xa000 && address < 0xc000);
 	}
 
 	public void SetByte(int address, int value)
@@ -60,7 +60,6 @@ public class Mbc1 : IAddressSpace
 		if (address >= 0x0000 && address < 0x2000)
 		{
 			ramWriteEnabled = (value & 0b1111) == 0b1010;
-
 			if (!ramWriteEnabled)
 			{
 				_battery.SaveRam(_ram);
@@ -94,7 +93,6 @@ public class Mbc1 : IAddressSpace
 		else if (address >= 0xa000 && address < 0xc000 && ramWriteEnabled)
 		{
 			int ramAddress = GetRamAddress(address);
-
 			if (ramAddress < _ram.Length)
 			{
 				_ram[ramAddress] = value;
@@ -124,7 +122,6 @@ public class Mbc1 : IAddressSpace
 			if (ramWriteEnabled)
 			{
 				int ramAddress = GetRamAddress(address);
-
 				if (ramAddress < _ram.Length)
 				{
 					return _ram[ramAddress];
@@ -169,7 +166,6 @@ public class Mbc1 : IAddressSpace
 		if (cachedRomBankFor0x4000 == -1)
 		{
 			int bank = selectedRomBank;
-
 			if (bank % 0x20 == 0)
 			{
 				bank++;
@@ -196,7 +192,6 @@ public class Mbc1 : IAddressSpace
 	private int GetRomByte(int bank, int address)
 	{
 		int cartOffset = bank * 0x4000 + address;
-
 		if (cartOffset < _cartridge.Length)
 		{
 			return _cartridge[cartOffset];

@@ -59,7 +59,6 @@ public class Mbc5 : IAddressSpace
 		else if (address >= 0x4000 && address < 0x6000)
 		{
 			int bank = value & 0x0f;
-
 			if (bank < _ramBanks)
 			{
 				_selectedRamBank = bank;
@@ -68,7 +67,6 @@ public class Mbc5 : IAddressSpace
 		else if (address >= 0xa000 && address < 0xc000 && _ramWriteEnabled)
 		{
 			int ramAddress = GetRamAddress(address);
-
 			if (ramAddress < _ram.Length)
 			{
 				_ram[ramAddress] = value;
@@ -91,7 +89,6 @@ public class Mbc5 : IAddressSpace
 		if (address >= 0xa000 && address < 0xc000)
 		{
 			int ramAddress = GetRamAddress(address);
-
 			if (ramAddress < _ram.Length)
 			{
 				return _ram[ramAddress];
@@ -106,7 +103,6 @@ public class Mbc5 : IAddressSpace
 	private int GetRomByte(int bank, int address)
 	{
 		int cartOffset = bank * 0x4000 + address;
-
 		if (cartOffset < _cartridge.Length)
 		{
 			return _cartridge[cartOffset];

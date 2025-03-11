@@ -1,5 +1,3 @@
-#nullable disable
-
 using Newtonsoft.Json;
 
 namespace coreboy.memory.cart.battery;
@@ -15,9 +13,9 @@ public class FileBattery(string romName) : IBattery
 			return;
 		}
 
-		var loaded = JsonConvert.DeserializeObject<SaveState>(
+		SaveState? loaded = JsonConvert.DeserializeObject<SaveState>(
 			File.ReadAllText(_saveFile.FullName));
-		loaded.Ram.CopyTo(ram, 0);
+		loaded?.Ram.CopyTo(ram, 0);
 	}
 
 	public void LoadRamWithClock(int[] ram, long[] clockData)
@@ -27,15 +25,15 @@ public class FileBattery(string romName) : IBattery
 			return;
 		}
 
-		var loaded = JsonConvert.DeserializeObject<SaveState>(
+		SaveState? loaded = JsonConvert.DeserializeObject<SaveState>(
 			File.ReadAllText(_saveFile.FullName));
-		loaded.Ram.CopyTo(ram, 0);
-		loaded.ClockData.CopyTo(clockData, 0);
+		loaded?.Ram.CopyTo(ram, 0);
+		loaded?.ClockData.CopyTo(clockData, 0);
 	}
 
 	public void SaveRam(int[] ram)
 	{
-		SaveRamWithClock(ram, null);
+		SaveRamWithClock(ram, []);
 	}
 
 	public void SaveRamWithClock(int[] ram, long[] clockData)
@@ -47,7 +45,7 @@ public class FileBattery(string romName) : IBattery
 
 	public class SaveState
 	{
-		public int[] Ram { get; set; }
-		public long[] ClockData { get; set; }
+		public required int[] Ram { get; set; }
+		public required long[] ClockData { get; set; }
 	}
 }
