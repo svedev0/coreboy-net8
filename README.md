@@ -28,7 +28,6 @@ bug reports, or improvements. Pull requests are welcome.
 | ----------- | --------------------------------------------------------------------------------- |
 | **Task**    | Write documentation                                                               |
 | **Task**    | Improve performace of animations                                                  |
-| **Task**    | Explore ways to improve scaling (clearer pixels) in Avalonia                      |
 | **Task**    | Phase out Windows Forms in favour of Avalonia for Windows [1]                     |
 | **Feature** | Implement native desktop support for Linux (in progress) [1]                      |
 | **Feature** | Implement native desktop support for MacOS [1]                                    |
