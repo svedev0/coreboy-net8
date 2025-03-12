@@ -3,7 +3,7 @@ namespace coreboy.sound;
 public class LengthCounter(int fullLength)
 {
 	private long _index;
-	private readonly int _divider = Gameboy.TicksPerSec / 256;
+	private int _divider => Gameboy.TicksPerSec / 256;
 	private readonly int _fullLength = fullLength;
 
 	public bool Enabled { get; private set; }

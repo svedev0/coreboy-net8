@@ -16,12 +16,11 @@ public class WinSound : ISoundOutput
 	private readonly byte[] _buffer = new byte[BufferSize];
 	private int _i = 0;
 	private int _tick;
-	private readonly int _divider;
+	private int _divider => Gameboy.TicksPerSec / SampleRate;
 	private AudioPlaybackEngine? _engine;
 
 	public WinSound()
 	{
-		_divider = Gameboy.TicksPerSec / SampleRate;
 	}
 
 	public void Start()
@@ -123,7 +122,7 @@ public class AudioPlaybackEngine : IDisposable
 		{
 			return input;
 		}
-		
+
 		if (input.WaveFormat.Channels == 1 && _mixer.WaveFormat.Channels == 2)
 		{
 			return new MonoToStereoSampleProvider(input);
