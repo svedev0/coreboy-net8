@@ -1,5 +1,3 @@
-#nullable disable
-
 using coreboy.memory;
 
 namespace coreboy.gpu.phase;
@@ -11,14 +9,14 @@ public class PixelTransfer : IGpuPhase
 	private readonly MemoryRegisters _memRegs;
 	private readonly Lcdc _lcdc;
 	private readonly bool _gbc;
-	private OamSearch.SpritePosition[] _sprites;
+	private OamSearch.SpritePosition?[]? _sprites;
 	private int _droppedPixels;
 	private int _x;
 	private bool _window;
 
 	public PixelTransfer(
 		IAddressSpace vRam0,
-		IAddressSpace vRam1,
+		IAddressSpace? vRam1,
 		IAddressSpace oemRam,
 		IDisplay display,
 		Lcdc lcdc,
@@ -43,7 +41,7 @@ public class PixelTransfer : IGpuPhase
 		_fetcher = new Fetcher(_fifo, vRam0, vRam1, oemRam, lcdc, memRegs, gbc);
 	}
 
-	public PixelTransfer Start(OamSearch.SpritePosition[] sprites)
+	public PixelTransfer Start(OamSearch.SpritePosition?[] sprites)
 	{
 		_sprites = sprites;
 		_droppedPixels = 0;
@@ -101,9 +99,9 @@ public class PixelTransfer : IGpuPhase
 
 			bool spriteAdded = false;
 
-			for (int i = 0; i < _sprites.Length; i++)
+			for (int i = 0; i < _sprites?.Length; i++)
 			{
-				var spritePos = _sprites[i];
+				OamSearch.SpritePosition? spritePos = _sprites[i];
 
 				if (spritePos == null)
 				{

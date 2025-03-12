@@ -64,7 +64,7 @@ public class MemoryRegisters : IAddressSpace
 			throw new ArgumentException("Not valid register: " + reg);
 		}
 
-		var value = _values[reg.Address] + 1;
+		int value = _values[reg.Address] + 1;
 		_values[reg.Address] = value;
 		return value;
 	}
@@ -76,8 +76,7 @@ public class MemoryRegisters : IAddressSpace
 
 	public void SetByte(int address, int value)
 	{
-		var regType = _registers[address].Type;
-
+		RegisterType regType = _registers[address].Type;
 		if (_allowsWrite.Contains(regType))
 		{
 			_values[address] = value;
@@ -86,8 +85,7 @@ public class MemoryRegisters : IAddressSpace
 
 	public int GetByte(int address)
 	{
-		var regType = _registers[address].Type;
-		
+		RegisterType regType = _registers[address].Type;
 		if (_allowsRead.Contains(regType))
 		{
 			return _values[address];

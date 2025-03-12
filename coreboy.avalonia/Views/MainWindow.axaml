@@ -7,20 +7,22 @@
         xmlns:siv="https://github.com/kekyo/SkiaImageView"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
 		MinWidth="256" MinHeight="256"
-		Height="512" Width="512"		
+		Height="512" Width="512"
         x:Class="coreboy.avalonia.Views.MainWindow"
 		x:DataType="vm:MainViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="coreboy.avalonia">
+        Title="coreboy.avalonia"
+		XYFocus.NavigationModes="Disabled"
+		KeyboardNavigation.TabNavigation="None">
 	<Design.DataContext>
 		<vm:MainViewModel />
 	</Design.DataContext>
-	<DockPanel>
-		<Menu DockPanel.Dock="Top">
-			<MenuItem Header="_File">
-				<MenuItem Header="_Open" Click="OpenFile_Click"/>
-				<MenuItem Header="_Pause" Command="{Binding PauseCommand}"/>
-				<MenuItem Header="_Screenshot" Click="ScreenShot_Click"/>
+	<DockPanel XYFocus.NavigationModes="Disabled" KeyboardNavigation.TabNavigation="None">
+		<Menu DockPanel.Dock="Top" XYFocus.NavigationModes="Disabled" KeyboardNavigation.TabNavigation="None">
+			<MenuItem Header="_Emulator" XYFocus.NavigationModes="Disabled" KeyboardNavigation.TabNavigation="None">
+				<MenuItem Header="_Load ROM" Click="LoadRom_Click" XYFocus.NavigationModes="Disabled" KeyboardNavigation.TabNavigation="None"/>
+				<MenuItem Header="_Pause" Command="{Binding PauseCommand}" XYFocus.NavigationModes="Disabled" KeyboardNavigation.TabNavigation="None"/>
+				<MenuItem Header="_Screenshot" Click="Screenshot_Click" XYFocus.NavigationModes="Disabled" KeyboardNavigation.TabNavigation="None"/>
 			</MenuItem>
 		</Menu>
 		<Grid>

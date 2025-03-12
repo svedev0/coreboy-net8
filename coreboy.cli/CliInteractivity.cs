@@ -1,6 +1,4 @@
-﻿#nullable disable
-
-using coreboy.controller;
+﻿using coreboy.controller;
 using Button = coreboy.controller.Button;
 
 namespace coreboy.cli;
@@ -8,7 +6,7 @@ namespace coreboy.cli;
 public class CliInteractivity : IController
 {
 	private readonly Dictionary<ConsoleKey, Button> controls;
-	private IButtonListener listener;
+	private IButtonListener? listener;
 
 	public CliInteractivity()
 	{
@@ -36,8 +34,8 @@ public class CliInteractivity : IController
 
 	public void ProcessInput()
 	{
-		Button lastButton = null;
-		var input = Console.ReadKey(true);
+		Button? lastButton = null;
+		ConsoleKeyInfo input = Console.ReadKey(true);
 
 		while (input.Key != ConsoleKey.Escape)
 		{
@@ -50,7 +48,7 @@ public class CliInteractivity : IController
 
 				listener?.OnButtonPress(button!);
 
-				var buttonSnapshot = button;
+				Button buttonSnapshot = button;
 
 				Task.Run(() =>
 				{
@@ -65,7 +63,7 @@ public class CliInteractivity : IController
 		}
 	}
 
-	public void UpdateDisplay(object sender, byte[] frameBytes)
+	public void UpdateDisplay(object _, byte[] frameBytes)
 	{
 		string frame = AsciiGenerator.GenerateFrame(frameBytes);
 		Console.SetCursorPosition(0, 0);

@@ -33,7 +33,7 @@ public class IntQueue(int capacity)
 	{
 		lock (_inner)
 		{
-			var asArray = _inner.ToArray();
+			int[] asArray = [.. _inner];
 			asArray[index] = value;
 			_inner = new Queue<int>(asArray);
 		}

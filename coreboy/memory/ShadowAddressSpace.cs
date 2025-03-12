@@ -34,7 +34,6 @@ public class ShadowAddressSpace(
 	private int GetRelative(int address)
 	{
 		int index = address - _echoStart;
-
 		if (index < 0 || index >= _length)
 		{
 			throw new ArgumentException("Invalid address");

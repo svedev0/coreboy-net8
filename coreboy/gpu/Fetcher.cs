@@ -1,5 +1,3 @@
-#nullable disable
-
 using coreboy.gpu.phase;
 using coreboy.memory;
 
@@ -11,7 +9,7 @@ using static GpuRegister;
 public class Fetcher(
 	IPixelFifo fifo,
 	IAddressSpace videoRam0,
-	IAddressSpace videoRam1,
+	IAddressSpace? videoRam1,
 	IAddressSpace oemRam,
 	Lcdc lcdc,
 	MemoryRegisters registers,
@@ -42,7 +40,7 @@ public class Fetcher(
 
 	private readonly IPixelFifo _fifo = fifo;
 	private readonly IAddressSpace _videoRam0 = videoRam0;
-	private readonly IAddressSpace _videoRam1 = videoRam1;
+	private readonly IAddressSpace? _videoRam1 = videoRam1;
 	private readonly IAddressSpace _oemRam = oemRam;
 	private readonly MemoryRegisters _memRegs = registers;
 	private readonly Lcdc _lcdc = lcdc;
@@ -59,13 +57,13 @@ public class Fetcher(
 	private bool _tileIdSigned;
 	private int _tileLine;
 	private int _tileId;
-	private TileAttributes _tileAttributes;
+	private TileAttributes _tileAttributes = TileAttributes.Empty;
 	private int _tileData1;
 	private int _tileData2;
 
 	private int _spriteTileLine;
-	private OamSearch.SpritePosition _sprite;
-	private TileAttributes _spriteAttributes;
+	private OamSearch.SpritePosition? _sprite;
+	private TileAttributes _spriteAttributes = TileAttributes.Empty;
 	private int _spriteOffset;
 	private int _spriteOamIndex;
 
@@ -125,7 +123,6 @@ public class Fetcher(
 		}
 
 		_divider--;
-
 		if (_divider == 0)
 		{
 			_divider = 2;
@@ -142,7 +139,7 @@ public class Fetcher(
 			case State.ReadTileId:
 				_tileId = _videoRam0.GetByte(_mapAddress + _xOffset);
 
-				if (_gbc)
+				if (_gbc && _videoRam1 != null)
 				{
 					_tileAttributes = TileAttributes.ValueOf(
 						_videoRam1.GetByte(_mapAddress + _xOffset));
@@ -179,11 +176,19 @@ public class Fetcher(
 				break;
 
 			case State.ReadSpriteTileId:
+				if (_sprite is null)
+				{
+					break;
+				}
 				_tileId = _oemRam.GetByte(_sprite.GetAddress() + 2);
 				_state = State.ReadSpriteFlags;
 				break;
 
 			case State.ReadSpriteFlags:
+				if (_sprite is null)
+				{
+					break;
+				}
 				_spriteAttributes = TileAttributes.ValueOf(
 					_oemRam.GetByte(_sprite.GetAddress() + 3));
 				_state = State.ReadSpriteData1;
@@ -260,7 +265,7 @@ public class Fetcher(
 			tileAddress = tileDataAddress + tileId * 0x10;
 		}
 
-		IAddressSpace vRam;
+		IAddressSpace? vRam;
 
 		if (attr.GetBank() == 0 || !_gbc)
 		{
@@ -271,7 +276,7 @@ public class Fetcher(
 			vRam = _videoRam1;
 		}
 
-		return vRam.GetByte(tileAddress + effectiveLine * 2 + byteNumber);
+		return vRam?.GetByte(tileAddress + effectiveLine * 2 + byteNumber) ?? 0;
 	}
 
 	public bool SpriteInProgress()
@@ -290,7 +295,6 @@ public class Fetcher(
 		{
 			int mask = 1 << i;
 			int pixel;
-
 			if ((data2 & mask) == 0)
 			{
 				pixel = 2 * 0 + ((data1 & mask) == 0 ? 0 : 1);

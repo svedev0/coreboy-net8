@@ -31,14 +31,12 @@ public class GbcRam : IAddressSpace
 	private int Translate(int address)
 	{
 		int ramBank = svbk & 0x7;
-
 		if (ramBank == 0)
 		{
 			ramBank = 1;
 		}
 
 		int result = address - 0xd000 + (ramBank - 1) * 0x1000;
-
 		if (result < 0 || result >= _ram.Length)
 		{
 			throw new ArgumentException("Invalid address");

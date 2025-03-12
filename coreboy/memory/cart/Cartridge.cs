@@ -88,7 +88,6 @@ public class Cartridge : IAddressSpace
 		for (int i = 0x0134; i < 0x0143; i++)
 		{
 			char c = (char)rom[i];
-
 			if (c == 0)
 			{
 				break;

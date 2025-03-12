@@ -1,5 +1,3 @@
-#nullable disable
-
 using System.Runtime.InteropServices;
 using coreboy.controller;
 using coreboy.gpu;
@@ -11,7 +9,7 @@ namespace coreboy.gui;
 
 public class Emulator(GameboyOptions options) : IRunnable
 {
-	public Gameboy Gameboy { get; set; }
+	public Gameboy? Gameboy { get; set; }
 	public IDisplay Display { get; set; } = new BitmapDisplay();
 	public IController Controller { get; set; } = new NullController();
 	public ISerialEndpoint ISerialEndpoint { get; set; } = new NullSerialEndpoint();
@@ -76,7 +74,7 @@ public class Emulator(GameboyOptions options) : IRunnable
 	{
 		if (Options.Headless)
 		{
-			return new(
+			return new Gameboy(
 				Options,
 				rom,
 				new NullDisplay(),
@@ -94,7 +92,7 @@ public class Emulator(GameboyOptions options) : IRunnable
 
 		if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 		{
-			return new(
+			return new Gameboy(
 				Options,
 				rom,
 				Display,
@@ -103,7 +101,7 @@ public class Emulator(GameboyOptions options) : IRunnable
 				ISerialEndpoint);
 		}
 
-		return new(
+		return new Gameboy(
 			Options,
 			rom,
 			Display,

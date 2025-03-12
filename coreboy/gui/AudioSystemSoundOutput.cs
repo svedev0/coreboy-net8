@@ -1,6 +1,4 @@
-﻿#nullable disable
-
-using NAudio.Wave;
+﻿using NAudio.Wave;
 using coreboy.sound;
 
 namespace coreboy.gui;
@@ -12,10 +10,10 @@ public class AudioSystemSoundOutput : ISoundOutput
 
 	private static readonly WaveFormat _format = new(sampleRate, 8, 2);
 
-	private BufferedWaveProvider bufferedWaveProvider;
-	private WaveOutEvent waveOut;
+	private BufferedWaveProvider? bufferedWaveProvider;
+	private WaveOutEvent? waveOut;
 
-	private byte[] buffer;
+	private byte[]? buffer;
 	private int bufferIndex;
 
 	private int tick;
@@ -73,12 +71,17 @@ public class AudioSystemSoundOutput : ISoundOutput
 		ValidateRange(left, 0, 255);
 		ValidateRange(right, 0, 255);
 
+		if (buffer is null)
+		{
+			return;
+		}
+
 		buffer[bufferIndex++] = (byte)left;
 		buffer[bufferIndex++] = (byte)right;
 
 		if (bufferIndex >= bufferSize / 2)
 		{
-			bufferedWaveProvider.AddSamples(buffer, 0, bufferIndex);
+			bufferedWaveProvider?.AddSamples(buffer, 0, bufferIndex);
 			bufferIndex = 0;
 		}
 	}

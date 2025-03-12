@@ -161,7 +161,7 @@ public class RealTimeClock(IClock clock)
 
 	public long[] Serialize()
 	{
-		var clockData = new long[11];
+		long[] clockData = new long[11];
 
 		Latch();
 		clockData[0] = clockData[5] = GetSeconds();

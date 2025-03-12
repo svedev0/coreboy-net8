@@ -55,7 +55,6 @@ public class Mbc2 : IAddressSpace
 		else if (address >= 0xa000 && address < 0xc000 && ramWriteEnabled)
 		{
 			int ramAddress = GetRamAddress(address);
-
 			if (ramAddress < _ram.Length)
 			{
 				_ram[ramAddress] = value & 0x0f;
@@ -78,7 +77,6 @@ public class Mbc2 : IAddressSpace
 		if (address >= 0xa000 && address < 0xb000)
 		{
 			int ramAddress = GetRamAddress(address);
-
 			if (ramAddress < _ram.Length)
 			{
 				return _ram[ramAddress];
@@ -93,7 +91,6 @@ public class Mbc2 : IAddressSpace
 	private int GetRomByte(int bank, int address)
 	{
 		int cartOffset = bank * 0x4000 + address;
-
 		if (cartOffset < _cartridge.Length)
 		{
 			return _cartridge[cartOffset];

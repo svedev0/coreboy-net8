@@ -1,5 +1,3 @@
-#nullable disable
-
 using coreboy.memory;
 
 namespace coreboy.gpu.phase;
@@ -36,7 +34,7 @@ public class OamSearch(IAddressSpace oemRam, Lcdc lcdc, MemoryRegisters register
 
 	private readonly IAddressSpace _oemRam = oemRam;
 	private readonly MemoryRegisters _registers = registers;
-	private readonly SpritePosition[] _sprites = new SpritePosition[10];
+	private readonly SpritePosition?[] _sprites = new SpritePosition[10];
 	private readonly Lcdc _lcdc = lcdc;
 	private int spritePosIndex;
 	private State state;
@@ -93,7 +91,7 @@ public class OamSearch(IAddressSpace oemRam, Lcdc lcdc, MemoryRegisters register
 		return index < 40;
 	}
 
-	public SpritePosition[] GetSprites()
+	public SpritePosition?[] GetSprites()
 	{
 		return _sprites;
 	}

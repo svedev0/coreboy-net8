@@ -58,7 +58,7 @@ public class Hdma(IAddressSpace addressSpace) : IAddressSpace
 		}
 		else if (hblankTransfer)
 		{
-			gpuMode = null; // wait until next HBlank
+			gpuMode = null; // Wait until next HBlank
 		}
 	}
 

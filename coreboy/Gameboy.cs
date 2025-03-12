@@ -42,7 +42,7 @@ public class Gameboy : IRunnable
 		gbcMode = rom.Gbc;
 		SpeedMode = new SpeedMode();
 
-		var interruptManager = new InterruptManager(gbcMode);
+		InterruptManager interruptManager = new(gbcMode);
 
 		timer = new Timer(interruptManager, SpeedMode);
 		Mmu = new Mmu();
@@ -92,7 +92,7 @@ public class Gameboy : IRunnable
 
 	private void InitiliseRegisters()
 	{
-		var registers = Cpu.Registers;
+		Registers registers = Cpu.Registers;
 		registers.SetAf(0x01b0);
 
 		if (gbcMode)
