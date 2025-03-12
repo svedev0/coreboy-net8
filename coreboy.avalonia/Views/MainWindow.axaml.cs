@@ -53,7 +53,29 @@ public partial class MainWindow : Window
 		}
 	}
 
-	private async void Screenshot_Click(object sender, RoutedEventArgs e)
+	private void Quit_Click(object _, RoutedEventArgs e)
+	{
+		Close();
+	}
+
+	private void PlayPause_Click(object _, RoutedEventArgs e)
+	{
+		if (DataContext is MainViewModel context)
+		{
+			context.Pause();
+
+			if ($"{PlayPauseMenuItem.Header}".Contains("Pause"))
+			{
+				PlayPauseMenuItem.Header = "_Play";
+			}
+			else
+			{
+				PlayPauseMenuItem.Header = "_Pause";
+			}
+		}
+	}
+
+	private async void Screenshot_Click(object _, RoutedEventArgs e)
 	{
 		IStorageProvider? storage = GetTopLevel(this)?.StorageProvider;
 		if (storage is null)
@@ -61,10 +83,22 @@ public partial class MainWindow : Window
 			return;
 		}
 
+		if (DataContext is not MainViewModel context)
+		{
+			return;
+		}
+		context.Pause();
+
 		FilePickerSaveOptions fpOptions = new()
 		{
 			Title = "Image Path",
 			DefaultExtension = ".png",
+			FileTypeChoices = [
+				new FilePickerFileType("PNG")
+				{
+					Patterns = ["*.png"],
+					MimeTypes = ["image/png"]
+				}]
 		};
 
 		IStorageFile? path = await storage.SaveFilePickerAsync(fpOptions);
@@ -79,10 +113,8 @@ public partial class MainWindow : Window
 			return;
 		}
 
-		if (DataContext is MainViewModel context)
-		{
-			await context.Screenshot(WebUtility.UrlDecode(absolutePath));
-		}
+		await context.Screenshot(WebUtility.UrlDecode(absolutePath));
+		context.Pause();
 	}
 
 	protected override void OnClosing(WindowClosingEventArgs e)
