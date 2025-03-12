@@ -18,22 +18,54 @@
 	<DockPanel KeyboardNavigation.TabNavigation="None">
 		<Menu DockPanel.Dock="Top" KeyboardNavigation.TabNavigation="None">
 			<MenuItem Header="_File" KeyboardNavigation.TabNavigation="None">
-				<MenuItem Header="_Load ROM" Click="LoadRom_Click" KeyboardNavigation.TabNavigation="None"/>
+				<MenuItem
+					Header="_Load ROM..." 
+					Click="LoadRom_Click"
+					ToolTip.Tip="Select ROM file"
+					KeyboardNavigation.TabNavigation="None"/>
 				<Separator/>
-				<MenuItem Header="_Quit" Click="Quit_Click" KeyboardNavigation.TabNavigation="None"/>
+				<MenuItem
+					Header="_Quit"
+					Click="Quit_Click"
+					ToolTip.Tip="Quit the application"
+					KeyboardNavigation.TabNavigation="None"/>
 			</MenuItem>
 			<MenuItem Header="_Emulator" KeyboardNavigation.TabNavigation="None">
-				<MenuItem x:Name="PlayPauseMenuItem" Header="_Pause" Click="PlayPause_Click" KeyboardNavigation.TabNavigation="None"/>
-				<MenuItem Header="_Speed" KeyboardNavigation.TabNavigation="None">
-					<MenuItem Header="_1x" Click="SetSpeed1x_Click" KeyboardNavigation.TabNavigation="None"/>
-					<MenuItem Header="_2x" Click="SetSpeed2x_Click" KeyboardNavigation.TabNavigation="None"/>
-					<MenuItem Header="_3x" Click="SetSpeed3x_Click" KeyboardNavigation.TabNavigation="None"/>
+				<MenuItem
+					x:Name="PlayPauseMenuItem"
+					Header="_Pause"
+					Click="PlayPause_Click"
+					ToolTip.Tip="Toggle play/pause"
+					KeyboardNavigation.TabNavigation="None"/>
+				<MenuItem
+					Header="_Speed"
+					ToolTip.Tip="Change emulation speed"
+					KeyboardNavigation.TabNavigation="None">
+					<MenuItem
+						Header="_1x"
+						Click="SetSpeed1x_Click"
+						KeyboardNavigation.TabNavigation="None"/>
+					<MenuItem
+						Header="_2x"
+						Click="SetSpeed2x_Click"
+						KeyboardNavigation.TabNavigation="None"/>
+					<MenuItem
+						Header="_3x"
+						Click="SetSpeed3x_Click"
+						KeyboardNavigation.TabNavigation="None"/>
 				</MenuItem>
-				<MenuItem Header="_Capture screenshot" Click="Screenshot_Click" KeyboardNavigation.TabNavigation="None"/>
+				<MenuItem
+					Header="_Capture screenshot"
+					Click="Screenshot_Click"
+					ToolTip.Tip="Capture a screenshot"
+					KeyboardNavigation.TabNavigation="None"/>
 			</MenuItem>
 		</Menu>
 		<Grid>
-			<siv:SKImageView Stretch="Uniform" Source="{Binding Bitmap}" RenderOptions.BitmapInterpolationMode="None"/>
+			<siv:SKImageView
+				Stretch="Uniform"
+				Source="{Binding Bitmap}"
+				RenderOptions.BitmapInterpolationMode="None"/>
 		</Grid>
 	</DockPanel>
 </Window>
