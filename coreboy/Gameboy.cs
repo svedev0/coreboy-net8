@@ -12,7 +12,13 @@ namespace coreboy;
 
 public class Gameboy : IRunnable
 {
-	public static readonly int TicksPerSec = 4_195_000;
+	private const int baseTicksPerSec = 4_195_000;
+	public static int TicksPerSec { get; private set; } = baseTicksPerSec;
+
+	public static void SetSpeedMultiplier(int multiplier)
+	{
+		TicksPerSec = baseTicksPerSec * multiplier;
+	}
 
 	public Mmu Mmu { get; }
 	public Cpu Cpu { get; }

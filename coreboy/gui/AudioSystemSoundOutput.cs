@@ -17,7 +17,7 @@ public class AudioSystemSoundOutput : ISoundOutput
 	private int bufferIndex;
 
 	private int tick;
-	private int divider;
+	private int divider => Gameboy.TicksPerSec / sampleRate;
 
 	public void Start()
 	{
@@ -43,7 +43,6 @@ public class AudioSystemSoundOutput : ISoundOutput
 
 		waveOut.Play();
 		buffer = new byte[bufferSize];
-		divider = Gameboy.TicksPerSec / sampleRate;
 	}
 
 	public void Stop()
@@ -52,7 +51,7 @@ public class AudioSystemSoundOutput : ISoundOutput
 		{
 			return;
 		}
-		
+
 		waveOut.Stop();
 		waveOut.Dispose();
 		waveOut = null;

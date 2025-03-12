@@ -5,15 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:coreboy.avalonia.Views"
         xmlns:siv="https://github.com/kekyo/SkiaImageView"
-        mc:Ignorable="d" d:DesignWidth="635" d:DesignHeight="600"
-		MinWidth="256" MinHeight="256"
-		Height="600" Width="635"
+        mc:Ignorable="d" d:DesignWidth="632" d:DesignHeight="600"
+		MinWidth="316" MinHeight="300"
+		Width="632" Height="600"
         x:Class="coreboy.avalonia.Views.MainWindow"
 		x:DataType="vm:MainViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="coreboy">
 	<Design.DataContext>
-		<vm:MainViewModel />
+		<vm:MainViewModel/>
 	</Design.DataContext>
 	<DockPanel KeyboardNavigation.TabNavigation="None">
 		<Menu DockPanel.Dock="Top" KeyboardNavigation.TabNavigation="None">
@@ -24,11 +24,16 @@
 			</MenuItem>
 			<MenuItem Header="_Emulator" KeyboardNavigation.TabNavigation="None">
 				<MenuItem x:Name="PlayPauseMenuItem" Header="_Pause" Click="PlayPause_Click" KeyboardNavigation.TabNavigation="None"/>
+				<MenuItem Header="_Speed" KeyboardNavigation.TabNavigation="None">
+					<MenuItem Header="_1x" Click="SetSpeed1x_Click" KeyboardNavigation.TabNavigation="None"/>
+					<MenuItem Header="_2x" Click="SetSpeed2x_Click" KeyboardNavigation.TabNavigation="None"/>
+					<MenuItem Header="_3x" Click="SetSpeed3x_Click" KeyboardNavigation.TabNavigation="None"/>
+				</MenuItem>
 				<MenuItem Header="_Capture screenshot" Click="Screenshot_Click" KeyboardNavigation.TabNavigation="None"/>
 			</MenuItem>
 		</Menu>
 		<Grid>
-			<siv:SKImageView Stretch="Uniform" Source="{Binding Bitmap}" />
+			<siv:SKImageView Stretch="Uniform" Source="{Binding Bitmap}" RenderOptions.BitmapInterpolationMode="None"/>
 		</Grid>
 	</DockPanel>
 </Window>

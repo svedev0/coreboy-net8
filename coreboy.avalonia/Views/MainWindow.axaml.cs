@@ -75,6 +75,31 @@ public partial class MainWindow : Window
 		}
 	}
 
+	private void SetSpeed1x_Click(object _, RoutedEventArgs e)
+	{
+		if (DataContext is MainViewModel context)
+		{
+			context.SetEmulationSpeed(1);
+		}
+	}
+
+
+	private void SetSpeed2x_Click(object _, RoutedEventArgs e)
+	{
+		if (DataContext is MainViewModel context)
+		{
+			context.SetEmulationSpeed(2);
+		}
+	}
+
+	private void SetSpeed3x_Click(object _, RoutedEventArgs e)
+	{
+		if (DataContext is MainViewModel context)
+		{
+			context.SetEmulationSpeed(3);
+		}
+	}
+
 	private async void Screenshot_Click(object _, RoutedEventArgs e)
 	{
 		IStorageProvider? storage = GetTopLevel(this)?.StorageProvider;

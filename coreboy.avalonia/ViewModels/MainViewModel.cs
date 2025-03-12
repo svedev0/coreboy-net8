@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using SkiaSharp;
 using coreboy.controller;
 using coreboy.gui;
@@ -90,6 +89,16 @@ public partial class MainViewModel : ObservableObject, IController
 		emulator.Run(cancellationSource.Token);
 	}
 
+	public void Pause()
+	{
+		emulator?.TogglePause();
+	}
+
+	public void SetEmulationSpeed(int multiplier)
+	{
+		Gameboy.SetSpeedMultiplier(multiplier);
+	}
+
 	public async Task Screenshot(string path)
 	{
 		if (Bitmap == null)
@@ -100,12 +109,6 @@ public partial class MainViewModel : ObservableObject, IController
 		using SKImage image = SKImage.FromBitmap(Bitmap);
 		using SKData data = image.Encode(SKEncodedImageFormat.Png, 100);
 		await File.WriteAllBytesAsync(path, data.ToArray());
-	}
-
-	[RelayCommand]
-	public void Pause()
-	{
-		emulator?.TogglePause();
 	}
 
 	internal void KeyDown(KeyEventArgs e)
