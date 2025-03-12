@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using SkiaSharp;
 using coreboy.controller;
 using coreboy.gui;
@@ -97,9 +96,7 @@ public partial class MainViewModel : ObservableObject, IController
 
 	public void SetEmulationSpeed(int multiplier)
 	{
-		emulator?.TogglePause();
-		// TODO: Implement
-		emulator?.TogglePause();
+		Gameboy.SetSpeedMultiplier(multiplier);
 	}
 
 	public async Task Screenshot(string path)
