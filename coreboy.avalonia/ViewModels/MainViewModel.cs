@@ -90,6 +90,18 @@ public partial class MainViewModel : ObservableObject, IController
 		emulator.Run(cancellationSource.Token);
 	}
 
+	public void Pause()
+	{
+		emulator?.TogglePause();
+	}
+
+	public void SetEmulationSpeed(int multiplier)
+	{
+		emulator?.TogglePause();
+		// TODO: Implement
+		emulator?.TogglePause();
+	}
+
 	public async Task Screenshot(string path)
 	{
 		if (Bitmap == null)
@@ -100,12 +112,6 @@ public partial class MainViewModel : ObservableObject, IController
 		using SKImage image = SKImage.FromBitmap(Bitmap);
 		using SKData data = image.Encode(SKEncodedImageFormat.Png, 100);
 		await File.WriteAllBytesAsync(path, data.ToArray());
-	}
-
-	[RelayCommand]
-	public void Pause()
-	{
-		emulator?.TogglePause();
 	}
 
 	internal void KeyDown(KeyEventArgs e)

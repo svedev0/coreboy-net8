@@ -24,6 +24,11 @@
 			</MenuItem>
 			<MenuItem Header="_Emulator" KeyboardNavigation.TabNavigation="None">
 				<MenuItem x:Name="PlayPauseMenuItem" Header="_Pause" Click="PlayPause_Click" KeyboardNavigation.TabNavigation="None"/>
+				<MenuItem Header="_Speed" KeyboardNavigation.TabNavigation="None">
+					<MenuItem Header="_1x" Click="SetSpeed1x_Click" KeyboardNavigation.TabNavigation="None"/>
+					<MenuItem Header="_2x" Click="SetSpeed2x_Click" KeyboardNavigation.TabNavigation="None"/>
+					<MenuItem Header="_3x" Click="SetSpeed3x_Click" KeyboardNavigation.TabNavigation="None"/>
+				</MenuItem>
 				<MenuItem Header="_Capture screenshot" Click="Screenshot_Click" KeyboardNavigation.TabNavigation="None"/>
 			</MenuItem>
 		</Menu>
