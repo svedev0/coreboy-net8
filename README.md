@@ -1,4 +1,4 @@
-# CoreBoy Revived
+# CoreBoy
 
 A GameBoy/GameBoy Color emulator written in C# .NET 8.
 
@@ -55,5 +55,5 @@ and the `-r` flag (e.g. with `win-x64`, `linux-x64`, etc.)
 1. Clone this repo
 2. Run: `cd coreboy-net8`
 3. Run: `dotnet restore`
-4. Run: `dotnet build coreboy.avalonia.Desktop -c Release -r linux-x64`
-5. Run: `./coreboy.avalonia.Desktop/bin/Release/net8.0/linux-x64/coreboy.avalonia.Desktop`
+4. Run: `dotnet build coreboy.avalonia.desktop -c Release -r linux-x64`
+5. Run: `./coreboy.avalonia.desktop/bin/Release/net8.0/linux-x64/coreboy.avalonia.desktop`
