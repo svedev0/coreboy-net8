@@ -1,7 +1,7 @@
 ﻿using System;
 using Avalonia;
 
-namespace coreboy.avalonia.Desktop;
+namespace coreboy.avalonia.desktop;
 
 class Program
 {
