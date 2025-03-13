@@ -14,8 +14,8 @@ to be compatible with .NET 8 and most of the original code has been refactored
 and/or rewritten in order to ensure compatibility and modern best practices.
 
 Some sacrifices have been made in order to increase velocity. For instance,
-native desktop support for Linux and MacOS were temporarily cut but are now
-being implemented (at least for Linux).
+native desktop support for MacOS has been cut but the goal is to implement it
+in the future.
 
 ## Contributing
 
