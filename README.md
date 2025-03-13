@@ -24,19 +24,14 @@ bug reports, or improvements. Pull requests are welcome.
 
 ## TODO
 
-| Category    | Summary                                                       |
-| ----------- | ------------------------------------------------------------- |
-| **Task**    | Write documentation                                           |
-| **Task**    | Improve performace of animations                              |
-| **Task**    | Phase out Windows Forms in favour of Avalonia for Windows [1] |
-| **Feature** | Implement native desktop support for Linux (in progress) [1]  |
-| **Feature** | Implement native desktop support for MacOS [1]                |
-| **Bug**     | Audio not working in Linux build                              |
-| **Bug**     | Uncapped frame rate in Linux build                            |
-
-1. Avalonia, as it is implemented right now, should be able to be built to
-multiple target platforms without making code changes using `dotnet publish`
-and the `-r` flag (e.g. with `win-x64`, `linux-x64`, etc.)
+| Category    | Summary                                             |
+| ----------- | --------------------------------------------------- |
+| **Task**    | Write documentation                                 |
+| **Task**    | Improve performace of animations                    |
+| **Feature** | Implement native desktop support for MacOS          |
+| **Feature** | Implement a way to send controller inputs from code |
+| **Bug**     | Audio not working in Linux build                    |
+| **Bug**     | Uncapped frame rate in Linux build                  |
 
 ## Build & run
 
@@ -45,13 +40,15 @@ and the `-r` flag (e.g. with `win-x64`, `linux-x64`, etc.)
 1. Clone this repo
 2. Run: `cd coreboy-net8`
 3. Run: `dotnet restore`
-4. Run: `dotnet build coreboy.win -c Release -r win-x64`
-5. Run: `.\coreboy.win\bin\Release\net8.0-windows\win-x64\coreboy.win.exe`
+4. Run: `dotnet publish coreboy.avalonia.desktop -c Release -r win-x64`
+5. Run: `cd coreboy.avalonia.desktop\bin\Release\net8.0\win-x64\publish`
+6. Run: `.\coreboy.avalonia.desktop.exe`
 
 ### Linux
 
 1. Clone this repo
 2. Run: `cd coreboy-net8`
 3. Run: `dotnet restore`
-4. Run: `dotnet build coreboy.avalonia.desktop -c Release -r linux-x64`
-5. Run: `./coreboy.avalonia.desktop/bin/Release/net8.0/linux-x64/coreboy.avalonia.desktop`
+4. Run: `dotnet publish coreboy.avalonia.desktop -c Release -r linux-x64`
+5. Run: `cd coreboy.avalonia.desktop/bin/Release/net8.0/linux-x64/publish`
+6. Run: `./coreboy.avalonia.desktop`

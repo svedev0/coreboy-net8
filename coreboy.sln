@@ -6,16 +6,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coreboy", "coreboy\coreboy.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coreboy.cli", "coreboy.cli\coreboy.cli.csproj", "{E175537A-4CCC-4436-AC6D-F0009461B273}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coreboy.win", "coreboy.win\coreboy.win.csproj", "{EE08FD45-8CF3-456E-AFD9-6547FEE487D4}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coreboy.avalonia", "coreboy.avalonia\coreboy.avalonia.csproj", "{FB11E177-9807-0DB5-C3A9-54B4836C4CA4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coreboy.avalonia.desktop", "coreboy.avalonia.desktop\coreboy.avalonia.desktop.csproj", "{A04CD709-14A6-B186-E38B-274FA835E5F4}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
-	ProjectSection(SolutionItems) = preProject
-		todo.md = todo.md
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,10 +24,6 @@ Global
 		{E175537A-4CCC-4436-AC6D-F0009461B273}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E175537A-4CCC-4436-AC6D-F0009461B273}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E175537A-4CCC-4436-AC6D-F0009461B273}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EE08FD45-8CF3-456E-AFD9-6547FEE487D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EE08FD45-8CF3-456E-AFD9-6547FEE487D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EE08FD45-8CF3-456E-AFD9-6547FEE487D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EE08FD45-8CF3-456E-AFD9-6547FEE487D4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FB11E177-9807-0DB5-C3A9-54B4836C4CA4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FB11E177-9807-0DB5-C3A9-54B4836C4CA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FB11E177-9807-0DB5-C3A9-54B4836C4CA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
