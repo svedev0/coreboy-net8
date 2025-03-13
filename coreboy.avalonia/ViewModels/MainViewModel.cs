@@ -68,7 +68,7 @@ public partial class MainViewModel : ObservableObject, IController
 		}
 		catch
 		{
-			// YOLO
+			// Ignored
 		}
 		finally
 		{
@@ -91,9 +91,10 @@ public partial class MainViewModel : ObservableObject, IController
 
 	public void Pause()
 	{
-		emulator?.TogglePause();
+		emulator.TogglePause();
 	}
 
+	// Ignore the LSP/IntelliSense. This should not be marked as static
 	public void SetEmulationSpeed(int multiplier)
 	{
 		Gameboy.SetSpeedMultiplier(multiplier);
@@ -106,7 +107,16 @@ public partial class MainViewModel : ObservableObject, IController
 			return;
 		}
 
-		using SKImage image = SKImage.FromBitmap(Bitmap);
+		string? outputDir = Path.GetDirectoryName(path);
+		if (string.IsNullOrEmpty(outputDir) && !Directory.Exists(outputDir))
+		{
+			return;
+		}
+
+		SKBitmap scaledBitmap = new(Bitmap.Width * 4, Bitmap.Height * 4);
+		Bitmap.ScalePixels(scaledBitmap, SKFilterQuality.None);
+
+		using SKImage image = SKImage.FromBitmap(scaledBitmap);
 		using SKData data = image.Encode(SKEncodedImageFormat.Png, 100);
 		await File.WriteAllBytesAsync(path, data.ToArray());
 	}
@@ -129,6 +139,7 @@ public partial class MainViewModel : ObservableObject, IController
 
 	internal void Close()
 	{
+		emulator.Display.OnFrameProduced -= UpdateDisplay;
 		cancellationSource.Cancel();
 	}
 }

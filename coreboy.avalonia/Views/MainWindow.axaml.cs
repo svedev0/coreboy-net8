@@ -102,17 +102,18 @@ public partial class MainWindow : Window
 
 	private async void Screenshot_Click(object _, RoutedEventArgs e)
 	{
-		IStorageProvider? storage = GetTopLevel(this)?.StorageProvider;
-		if (storage is null)
-		{
-			return;
-		}
-
 		if (DataContext is not MainViewModel context)
 		{
 			return;
 		}
 		context.Pause();
+
+		IStorageProvider? storage = GetTopLevel(this)?.StorageProvider;
+		if (storage is null)
+		{
+			context.Pause();
+			return;
+		}
 
 		FilePickerSaveOptions fpOptions = new()
 		{
@@ -126,19 +127,21 @@ public partial class MainWindow : Window
 				}]
 		};
 
-		IStorageFile? path = await storage.SaveFilePickerAsync(fpOptions);
-		if (path is null)
+		IStorageFile? pickerResult = await storage.SaveFilePickerAsync(fpOptions);
+		if (pickerResult is null)
 		{
+			context.Pause();
 			return;
 		}
 
-		string? absolutePath = path.Path?.AbsolutePath;
-		if (string.IsNullOrEmpty(absolutePath))
+		string? pngPath = pickerResult.Path?.AbsolutePath;
+		if (string.IsNullOrEmpty(pngPath))
 		{
+			context.Pause();
 			return;
 		}
 
-		await context.Screenshot(WebUtility.UrlDecode(absolutePath));
+		await context.Screenshot(WebUtility.UrlDecode(pngPath));
 		context.Pause();
 	}
 
