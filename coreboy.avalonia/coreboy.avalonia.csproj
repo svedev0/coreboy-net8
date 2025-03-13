@@ -21,6 +21,7 @@
 
     <!-- Condition below is needed to remove Avalonia.Diagnostics package from build in Release configuration -->
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.2.5" />
+    <PackageReference Include="SkiaSharp" Version="2.88.9" />
   </ItemGroup>
 
   <ItemGroup>
