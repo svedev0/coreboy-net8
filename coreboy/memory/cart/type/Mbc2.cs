@@ -11,7 +11,7 @@ public class Mbc2 : IAddressSpace
 	private int selectedRomBank = 1;
 	private bool ramWriteEnabled;
 
-	public Mbc2(int[] cartridge, CartridgeType type, IBattery battery, int romBanks)
+	public Mbc2(int[] cartridge, IBattery battery)
 	{
 		_cartridge = cartridge;
 		_ram = new int[0x0200];

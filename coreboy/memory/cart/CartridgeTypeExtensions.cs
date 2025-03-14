@@ -4,7 +4,7 @@ namespace coreboy.memory.cart;
 
 public static class CartridgeTypeExtensions
 {
-	public static IEnumerable<CartridgeType> Values(this CartridgeType src)
+	public static IEnumerable<CartridgeType> Values(this CartridgeType _)
 	{
 		return Enum.GetValues(typeof(CartridgeType)).Cast<CartridgeType>();
 	}

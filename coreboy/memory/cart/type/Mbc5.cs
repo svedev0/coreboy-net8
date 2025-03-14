@@ -12,12 +12,7 @@ public class Mbc5 : IAddressSpace
 	private int _selectedRomBank = 1;
 	private bool _ramWriteEnabled;
 
-	public Mbc5(
-		int[] cartridge,
-		CartridgeType type,
-		IBattery battery,
-		int romBanks,
-		int ramBanks)
+	public Mbc5(int[] cartridge, IBattery battery, int ramBanks)
 	{
 		_cartridge = cartridge;
 		_ramBanks = ramBanks;

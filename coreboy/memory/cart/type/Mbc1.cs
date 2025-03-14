@@ -27,12 +27,7 @@ public class Mbc1 : IAddressSpace
 	private int cachedRomBankFor0x0000 = -1;
 	private int cachedRomBankFor0x4000 = -1;
 
-	public Mbc1(
-		int[] cartridge,
-		CartridgeType type,
-		IBattery battery,
-		int romBanks,
-		int ramBanks)
+	public Mbc1(int[] cartridge, IBattery battery, int romBanks, int ramBanks)
 	{
 		_multicart = romBanks == 64 && IsMulticart(cartridge);
 		_cartridge = cartridge;

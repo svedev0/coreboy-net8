@@ -16,12 +16,7 @@ public class Mbc3 : IAddressSpace
 	private int latchClockReg = 0xff;
 	private bool clockLatched;
 
-	public Mbc3(
-		int[] cartridge,
-		CartridgeType type,
-		IBattery battery,
-		int romBanks,
-		int ramBanks)
+	public Mbc3(int[] cartridge, IBattery battery, int ramBanks)
 	{
 		_cartridge = cartridge;
 		_ram = new int[0x2000 * Math.Max(ramBanks, 1)];

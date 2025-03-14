@@ -46,19 +46,19 @@ public class Cartridge : IAddressSpace
 
 		if (type.IsMbc1())
 		{
-			_addressSpace = new Mbc1(rom, type, battery, romBanks, ramBanks);
+			_addressSpace = new Mbc1(rom, battery, romBanks, ramBanks);
 		}
 		else if (type.IsMbc2())
 		{
-			_addressSpace = new Mbc2(rom, type, battery, romBanks);
+			_addressSpace = new Mbc2(rom, battery);
 		}
 		else if (type.IsMbc3())
 		{
-			_addressSpace = new Mbc3(rom, type, battery, romBanks, ramBanks);
+			_addressSpace = new Mbc3(rom, battery, ramBanks);
 		}
 		else if (type.IsMbc5())
 		{
-			_addressSpace = new Mbc5(rom, type, battery, romBanks, ramBanks);
+			_addressSpace = new Mbc5(rom, battery, ramBanks);
 		}
 		else
 		{
@@ -81,7 +81,7 @@ public class Cartridge : IAddressSpace
 		};
 	}
 
-	private static string GetTitle(IReadOnlyList<int> rom)
+	private static string GetTitle(int[] rom)
 	{
 		StringBuilder sb = new();
 
@@ -137,7 +137,7 @@ public class Cartridge : IAddressSpace
 			throw new Exception("Cartridge file is null");
 		}
 
-		return File.ReadAllBytes(file.FullName).Select(x => (int)x).ToArray();
+		return [.. File.ReadAllBytes(file.FullName).Select(x => (int)x)];
 	}
 
 	private static int GetRomBanks(int id)
