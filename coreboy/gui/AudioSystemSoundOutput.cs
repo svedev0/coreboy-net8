@@ -15,9 +15,7 @@ public class AudioSystemSoundOutput : ISoundOutput
 
 	private byte[]? buffer;
 	private int bufferIndex;
-
 	private int tick;
-	private int divider => Gameboy.TicksPerSec / sampleRate;
 
 	public void Start()
 	{
@@ -63,7 +61,7 @@ public class AudioSystemSoundOutput : ISoundOutput
 
 		if (tick != 0)
 		{
-			tick %= divider;
+			tick %= Gameboy.TicksPerSec / sampleRate;
 			return;
 		}
 

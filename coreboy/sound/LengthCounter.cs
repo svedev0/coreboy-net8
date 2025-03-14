@@ -3,9 +3,9 @@ namespace coreboy.sound;
 public class LengthCounter(int fullLength)
 {
 	private long _index;
-	private int _divider => Gameboy.TicksPerSec / 256;
 	private readonly int _fullLength = fullLength;
 
+	private static int Divider => Gameboy.TicksPerSec / 256;
 	public bool Enabled { get; private set; }
 	public int Length { get; private set; }
 
@@ -18,7 +18,7 @@ public class LengthCounter(int fullLength)
 	{
 		_index++;
 
-		if (_index == _divider)
+		if (_index == Divider)
 		{
 			_index = 0;
 
@@ -50,7 +50,7 @@ public class LengthCounter(int fullLength)
 		{
 			if (Length == 0 && trigger)
 			{
-				if (enable && _index < _divider / 2)
+				if (enable && _index < Divider / 2)
 				{
 					SetLength(_fullLength - 1);
 				}
@@ -62,12 +62,12 @@ public class LengthCounter(int fullLength)
 		}
 		else if (enable)
 		{
-			if (Length > 0 && _index < _divider / 2)
+			if (Length > 0 && _index < Divider / 2)
 			{
 				Length--;
 			}
 
-			if (Length == 0 && trigger && _index < _divider / 2)
+			if (Length == 0 && trigger && _index < Divider / 2)
 			{
 				SetLength(_fullLength - 1);
 			}

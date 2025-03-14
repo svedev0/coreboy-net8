@@ -81,7 +81,7 @@ public class Argument(
 			new Argument("a16", 2, false, DataType.D16).Handle(
 				(reg, addr, args) => BitUtils.ToWord(args),
 				(reg, addr, i1, value) => throw new InvalidOpE("Unsupported")),
-				
+
             // _BC
             new Argument("(BC)", 0, true, DataType.D8).Handle(
 				(reg, addr, args) => addr.GetByte(reg.BC),
@@ -141,10 +141,7 @@ public class Argument(
 
 	public void Write(Registers regs, IAddressSpace addrSpace, int[] args, int value)
 	{
-		if (_writeAction != null)
-		{
-			_writeAction(regs, addrSpace, args, value);
-		}
+		_writeAction?.Invoke(regs, addrSpace, args, value);
 	}
 
 	public static Argument Parse(string argument)

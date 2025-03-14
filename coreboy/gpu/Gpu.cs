@@ -14,9 +14,9 @@ public class Gpu : IAddressSpace
 		PixelTransfer
 	}
 
-	private readonly IAddressSpace _vRam0;
-	private readonly IAddressSpace? _vRam1;
-	private readonly IAddressSpace _oamRam;
+	private readonly Ram _vRam0;
+	private readonly Ram? _vRam1;
+	private readonly Ram _oamRam;
 	private readonly IDisplay _display;
 	private readonly InterruptManager _intManager;
 	private readonly Dma _dma;
@@ -39,7 +39,7 @@ public class Gpu : IAddressSpace
 	public Gpu(
 		IDisplay display, InterruptManager intManager, Dma dma, Ram oamRam, bool gbc)
 	{
-		_memRegs = new MemoryRegisters(GpuRegister.Values().ToArray());
+		_memRegs = new MemoryRegisters([.. GpuRegister.Values()]);
 		_lcdc = new Lcdc();
 		_intManager = intManager;
 		_gbc = gbc;
@@ -107,7 +107,7 @@ public class Gpu : IAddressSpace
 		return null;
 	}
 
-	private IAddressSpace GetVideoRam()
+	private Ram GetVideoRam()
 	{
 		if (_gbc && _vRam1 != null && (_memRegs.Get(GpuRegister.Vbk) & 1) == 1)
 		{
