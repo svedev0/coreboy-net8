@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
+    <OutputType>Library</OutputType>
 	<RootNamespace>coreboy.avalonia</RootNamespace>
     <AssemblyName>coreboy.avalonia</AssemblyName>
+	<AvaloniaVersion>11.2.5</AvaloniaVersion>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
 
