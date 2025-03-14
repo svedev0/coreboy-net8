@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
-using Avalonia.Input;
+﻿using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using SkiaSharp;
 using coreboy.controller;
