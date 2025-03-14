@@ -10,13 +10,12 @@ namespace coreboy.gui;
 /// </summary>
 public class WinSound : ISoundOutput
 {
-	private const int BufferSize = 1024;
-	public const int SampleRate = 22050;
+	private const int bufferSize = 1024;
+	private const int sampleRate = 22050;
 
-	private readonly byte[] _buffer = new byte[BufferSize];
+	private readonly byte[] _buffer = new byte[bufferSize];
 	private int _i = 0;
 	private int _tick;
-	private int _divider => Gameboy.TicksPerSec / SampleRate;
 	private AudioPlaybackEngine? _engine;
 
 	public WinSound()
@@ -25,7 +24,7 @@ public class WinSound : ISoundOutput
 
 	public void Start()
 	{
-		_engine = new AudioPlaybackEngine(SampleRate, 2);
+		_engine = new AudioPlaybackEngine(sampleRate, 2);
 	}
 
 	public void Stop()
@@ -38,26 +37,26 @@ public class WinSound : ISoundOutput
 	{
 		if (_tick++ != 0)
 		{
-			_tick %= _divider;
+			_tick %= Gameboy.TicksPerSec / sampleRate;
 			return;
 		}
 
 		left = (int)(left * 0.25);
 		right = (int)(right * 0.25);
 
-		left = left < 0 ? 0 : (left > 255 ? 255 : left);
-		right = right < 0 ? 0 : (right > 255 ? 255 : right);
+		left = left < 0 ? 0 : left > 255 ? 255 : left;
+		right = right < 0 ? 0 : right > 255 ? 255 : right;
 
 		_buffer[_i++] = (byte)left;
 		_buffer[_i++] = (byte)right;
-		if (_i > BufferSize / 2)
+		if (_i > bufferSize / 2)
 		{
 			_engine?.PlaySound(_buffer, 0, _i);
 			_i = 0;
 		}
 
 		// Wait until engine is done playing current audio data
-		while (_engine?.GetQueuedAudioLength() > BufferSize)
+		while (_engine?.GetQueuedAudioLength() > bufferSize)
 		{
 			// Task.Delay(1) waits longer than 1 ms on Windows. Thread.Yield() is better.
 			Thread.Yield();
@@ -65,14 +64,19 @@ public class WinSound : ISoundOutput
 	}
 }
 
-public class AudioPlaybackEngine : IDisposable
+public class AudioPlaybackEngine
 {
-	private IWavePlayer _outputDevice;
+	private readonly int _sampleRate;
+	private readonly int _channelCount;
+	private readonly WasapiOut _outputDevice;
 	private readonly MixingSampleProvider _mixer;
-	private readonly BufferedWaveProvider _bufferedWaveProvider;
+	private readonly BufferedWaveProvider _bufferedWave;
 
-	public AudioPlaybackEngine(int sampleRate = 44100, int channelCount = 2)
+	public AudioPlaybackEngine(int sampleRate, int channelCount)
 	{
+		_sampleRate = sampleRate;
+		_channelCount = channelCount;
+
 		WaveFormat mixerFormat = WaveFormat.CreateIeeeFloatWaveFormat(
 			sampleRate, channelCount);
 
@@ -84,31 +88,31 @@ public class AudioPlaybackEngine : IDisposable
 
 		WaveFormat bufferedFormat = WaveFormat.CreateCustomFormat(
 			tag: WaveFormatEncoding.Pcm,
-			sampleRate: WinSound.SampleRate,
-			channels: 2,
-			averageBytesPerSecond: WinSound.SampleRate,
+			sampleRate: _sampleRate,
+			channels: _channelCount,
+			averageBytesPerSecond: _sampleRate,
 			blockAlign: 8,
 			bitsPerSample: 8);
 
-		_bufferedWaveProvider = new BufferedWaveProvider(bufferedFormat)
+		_bufferedWave = new BufferedWaveProvider(bufferedFormat)
 		{
 			ReadFully = true,
 			DiscardOnBufferOverflow = true
 		};
 
-		AddMixerInput(_bufferedWaveProvider.ToSampleProvider());
+		AddMixerInput(_bufferedWave.ToSampleProvider());
 		_outputDevice.Init(_mixer);
 		_outputDevice.Play();
 	}
 
 	public int GetQueuedAudioLength()
 	{
-		return _bufferedWaveProvider.BufferedBytes;
+		return _bufferedWave.BufferedBytes;
 	}
 
 	public void PlaySound(byte[] buffer, int offset, int count)
 	{
-		_bufferedWaveProvider.AddSamples(buffer, offset, count);
+		_bufferedWave.AddSamples(buffer, offset, count);
 	}
 
 	private void AddMixerInput(ISampleProvider input)
@@ -118,17 +122,17 @@ public class AudioPlaybackEngine : IDisposable
 
 	private ISampleProvider ConvertToRightChannelCount(ISampleProvider input)
 	{
-		if (input.WaveFormat.Channels == _mixer.WaveFormat.Channels)
+		if (input.WaveFormat.Channels == _channelCount)
 		{
 			return input;
 		}
 
-		if (input.WaveFormat.Channels == 1 && _mixer.WaveFormat.Channels == 2)
+		if (input.WaveFormat.Channels == 1 && _channelCount == 2)
 		{
 			return new MonoToStereoSampleProvider(input);
 		}
 
-		throw new NotImplementedException("This channel count is not implemented");
+		throw new NotImplementedException("Unimplemented channel count");
 	}
 
 	public void Dispose()
