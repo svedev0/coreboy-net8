@@ -39,21 +39,20 @@ public class CliInteractivity : IController
 
 		while (input.Key != ConsoleKey.Escape)
 		{
-			if (controls.TryGetValue(input.Key, out var button))
+			if (controls.TryGetValue(input.Key, out Button? button))
 			{
 				if (lastButton != button && lastButton != null)
 				{
 					listener?.OnButtonRelease(lastButton);
 				}
 
-				listener?.OnButtonPress(button!);
-
+				listener?.OnButtonPress(button);
 				Button buttonSnapshot = button;
 
 				Task.Run(() =>
 				{
 					Task.Delay(500).Wait();
-					listener?.OnButtonRelease(buttonSnapshot!);
+					listener?.OnButtonRelease(buttonSnapshot);
 				});
 
 				lastButton = button;
@@ -63,6 +62,7 @@ public class CliInteractivity : IController
 		}
 	}
 
+	// Ignore the LSP/IntelliSense. This should not be marked as static
 	public void UpdateDisplay(object _, byte[] frameBytes)
 	{
 		string frame = AsciiGenerator.GenerateFrame(frameBytes);
