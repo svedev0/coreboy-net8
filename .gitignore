@@ -453,5 +453,9 @@ $RECYCLE.BIN/
 !.vscode/launch.json
 !.vscode/extensions.json
 
+# GB/GBC ROM files
+*.gb
+*.gbc
+
 # GB/GBC save files
 *.sav.json
