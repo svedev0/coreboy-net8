@@ -110,7 +110,8 @@ public partial class MainViewModel : ObservableObject, IController
 		}
 
 		SKBitmap scaledBitmap = new(Bitmap.Width * 4, Bitmap.Height * 4);
-		Bitmap.ScalePixels(scaledBitmap, SKFilterQuality.None);
+		SKSamplingOptions samplingOpts = new(SKFilterMode.Nearest, SKMipmapMode.None);
+		Bitmap.ScalePixels(scaledBitmap, samplingOpts);
 
 		using SKImage image = SKImage.FromBitmap(scaledBitmap);
 		using SKData data = image.Encode(SKEncodedImageFormat.Png, 100);
