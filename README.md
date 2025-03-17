@@ -52,3 +52,9 @@ bug reports, or improvements. Pull requests are welcome.
 4. Run: `dotnet publish coreboy.avalonia.desktop -c Release -r linux-x64`
 5. Run: `cd coreboy.avalonia.desktop/bin/Release/net8.0/linux-x64/publish`
 6. Run: `./coreboy.avalonia.desktop`
+
+### Interactive CLI
+
+When running the CLI in interactive mode (`--interactive`) or with any other
+named argument/flag, you must specify `-r` (or `--rom`) before the ROM file
+path. For example: `coreboy.cli -r "path/to/rom" --interactive`
