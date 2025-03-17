@@ -9,22 +9,22 @@ public abstract class AsciiGenerator
 {
 	private static readonly Dictionary<float, string> Map = new()
 	{
-		{000, "█"},
-		{020, "▓"},
-		{040, "▒"},
-		{060, "░"},
-		{080, "%"},
-		{100, "@"},
-		{110, "#"},
-		{120, "+"},
-		{130, "O"},
-		{140, "o"},
-		{150, "."},
-		{160, " "},
-		{170, " "},
-		{180, " "},
-		{190, " "},
-		{200, " "}
+		{000, "\u2588"}, // █
+		{020, "\u2593"}, // ▓
+		{040, "\u2592"}, // ▒
+		{060, "\u2591"}, // ░
+		{080, "\u0025"}, // %
+		{100, "\u0040"}, // @
+		{110, "\u0023"}, // #
+		{120, "\u002B"}, // +
+		{130, "\u004F"}, // O
+		{140, "\u006F"}, // o
+		{150, "\u002E"}, // .
+		{160, "\u0020"}, // [space]
+		{170, "\u0020"}, // [space]
+		{180, "\u0020"}, // [space]
+		{190, "\u0020"}, // [space]
+		{200, "\u0020"}, // [space]
 	};
 
 	public static string GenerateFrame(byte[] frameBytes)
@@ -42,7 +42,7 @@ public abstract class AsciiGenerator
 				string currentChar = MapToAscii(Map, pixelVal);
 				sb.Append(currentChar);
 			}
-			
+
 			sb.Append(Environment.NewLine);
 		}
 
@@ -51,17 +51,12 @@ public abstract class AsciiGenerator
 
 	private static string MapToAscii(Dictionary<float, string> map, Rgba32 pixelVal)
 	{
-		string currentChar = string.Empty;
-
-		foreach ((float key, string value) in map)
+		string? mappedChar = map.LastOrDefault(kvp => kvp.Key <= pixelVal.R).Value;
+		if (string.IsNullOrEmpty(mappedChar))
 		{
-			if (key <= pixelVal.R)
-			{
-				currentChar = value;
-			}
+			return "\u0020";
 		}
-
-		return currentChar;
+		return mappedChar;
 	}
 
 	private static string ProcessOutput(StringBuilder sb)

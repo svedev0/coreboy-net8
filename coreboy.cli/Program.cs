@@ -9,16 +9,18 @@ public class Program
 		CancellationTokenSource cancellation = new();
 		GameboyOptions options = GameboyOptions.Parse(args);
 		Emulator emulator = new(options);
+		CliInteractivity? tui = null;
 
-		if (!options.RomSpecified)
+		if (!options.RomSpecified || !Path.Exists(options.Rom))
 		{
+			Console.WriteLine("Invalid ROM file path");
 			Console.WriteLine(GameboyOptions.UsageInfo);
 			return;
 		}
 
 		if (options.Interactive)
 		{
-			CliInteractivity tui = new();
+			tui = new CliInteractivity();
 			emulator.Controller = tui;
 			emulator.Display.OnFrameProduced += tui.UpdateDisplay;
 			emulator.Run(cancellation.Token);
@@ -30,6 +32,12 @@ public class Program
 			Console.WriteLine("Running in headless mode");
 			Console.WriteLine("Press any key to exit...");
 			Console.ReadKey(true);
+		}
+
+		// On exit
+		if (tui != null)
+		{
+			emulator.Display.OnFrameProduced -= tui.UpdateDisplay;
 		}
 
 		cancellation.Cancel();
