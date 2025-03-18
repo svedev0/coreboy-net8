@@ -24,15 +24,17 @@ bug reports, or improvements. Pull requests are welcome.
 
 ## TODO
 
-| Category    | Summary                                      |
-| ----------- | -------------------------------------------- |
-| **Task**    | Write documentation                          |
-| **Task**    | Improve performace of animations             |
-| **Feature** | Native desktop support for MacOS             |
-| **Feature** | Some way to send controller inputs from code |
-| **Feature** | Emulation speed measurement                  |
-| **Bug**     | Audio not working in Linux build             |
-| **Bug**     | Uncapped frame rate in Linux build           |
+| Category    | Summary                                                  |
+| ----------- | -------------------------------------------------------- |
+| **Task**    | Write documentation                                      |
+| **Task**    | Improve performace of animations                         |
+| **Task**    | Adjust sound pitch when fast-forwarding                  |
+| **Task**    | Unify image libraries, replace ImageSharp with SkiaSharp |
+| **Feature** | Native desktop support for MacOS                         |
+| **Feature** | Sending controller inputs from code                      |
+| **Feature** | A way to measure and display emulation speed             |
+| **Bug**     | Audio not working in Linux build                         |
+| **Bug**     | Uncapped frame rate in Linux build                       |
 
 ## Build & run
 
