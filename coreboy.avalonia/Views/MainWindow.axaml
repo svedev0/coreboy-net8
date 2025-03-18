@@ -8,6 +8,7 @@
         mc:Ignorable="d" d:DesignWidth="632" d:DesignHeight="600"
 		MinWidth="316" MinHeight="300"
 		Width="632" Height="600"
+		WindowStartupLocation="CenterScreen"
         x:Class="coreboy.avalonia.Views.MainWindow"
 		x:DataType="vm:MainViewModel"
         Icon="/Assets/avalonia-logo.ico"
