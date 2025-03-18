@@ -1,7 +1,5 @@
 ﻿using System.Text;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
+using SkiaSharp;
 
 namespace coreboy.cli;
 
@@ -29,16 +27,18 @@ public abstract class AsciiGenerator
 
 	public static string GenerateFrame(byte[] frameBytes)
 	{
-		using Image<Rgba32> image = Image.Load<Rgba32>(frameBytes);
-		image.Mutate(x => x.Resize(160, 72));
+		using SKBitmap bitmap = SKBitmap.Decode(frameBytes);
+		using SKBitmap scaledBitmap = new(160, 72);
+		SKSamplingOptions samplingOpts = new(SKFilterMode.Nearest, SKMipmapMode.None);
+		bitmap.ScalePixels(scaledBitmap, samplingOpts);
 
 		StringBuilder sb = new();
 
-		for (int y = 0; y < image.Height; y++)
+		for (int y = 0; y < scaledBitmap.Height; y++)
 		{
-			for (int x = 0; x < image.Width; x++)
+			for (int x = 0; x < scaledBitmap.Width; x++)
 			{
-				Rgba32 pixelVal = image[x, y];
+				byte pixelVal = scaledBitmap.GetPixel(x, y).Red;
 				string currentChar = MapToAscii(Map, pixelVal);
 				sb.Append(currentChar);
 			}
@@ -49,9 +49,9 @@ public abstract class AsciiGenerator
 		return ProcessOutput(sb);
 	}
 
-	private static string MapToAscii(Dictionary<float, string> map, Rgba32 pixelVal)
+	private static string MapToAscii(Dictionary<float, string> map, byte pixelVal)
 	{
-		string? mappedChar = map.LastOrDefault(kvp => kvp.Key <= pixelVal.R).Value;
+		string? mappedChar = map.LastOrDefault(kvp => kvp.Key <= pixelVal).Value;
 		if (string.IsNullOrEmpty(mappedChar))
 		{
 			return "\u0020";
