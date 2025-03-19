@@ -1,13 +1,11 @@
 using System.Runtime.CompilerServices;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 
 namespace coreboy.gui;
 
 public class GameboyDisplayFrame(int[] pixels)
 {
-	public static readonly int DisplayWidth = 160;
-	public static readonly int DisplayHeight = 144;
+	public const int DisplayWidth = 160;
+	public const int DisplayHeight = 144;
 
 	private readonly int[] _pixels = pixels;
 
@@ -26,7 +24,7 @@ public class GameboyDisplayFrame(int[] pixels)
 
 	public byte[] ToBitmap()
 	{
-		Image<Rgba32> pixels = new(DisplayWidth, DisplayHeight);
+		RgbaPixel[,] pixels = new RgbaPixel[DisplayWidth, DisplayHeight];
 
 		int x = 0;
 		int y = 0;
@@ -40,21 +38,18 @@ public class GameboyDisplayFrame(int[] pixels)
 			}
 
 			(int r, int g, int b) = pixel.ToRgb();
-			pixels[x, y] = new Rgba32((byte)r, (byte)g, (byte)b, 255);
+			pixels[x, y] = new RgbaPixel(r, g, b, 255);
 			x++;
 		}
 
-		using MemoryStream memoryStream = new();
-		pixels.SaveAsBmp(memoryStream);
-		pixels.Dispose();
-		return memoryStream.ToArray();
+		return BmpEncoder.EncodeBmp(pixels);
 	}
 }
 
 public static class GameboyDisplayFrameHelperExtensions
 {
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static (int, int, int) ToRgb(this int pixel)
+	public static (int R, int G, int B) ToRgb(this int pixel)
 	{
 		int b = pixel & 255;
 		int g = (pixel >> 8) & 255;
