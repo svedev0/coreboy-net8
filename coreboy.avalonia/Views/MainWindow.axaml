@@ -20,45 +20,51 @@
 		<Menu DockPanel.Dock="Top" KeyboardNavigation.TabNavigation="None">
 			<MenuItem Header="_File" KeyboardNavigation.TabNavigation="None">
 				<MenuItem
-					Header="_Load ROM..." 
-					Click="LoadRom_Click"
+					x:Name="LoadRomMenuItem"
+					Header="_Load ROM..."
 					ToolTip.Tip="Select ROM file"
+					Click="LoadRom_Click"
 					KeyboardNavigation.TabNavigation="None"/>
 				<Separator/>
 				<MenuItem
+					x:Name="QuitMenuItem"
 					Header="_Quit"
-					Click="Quit_Click"
 					ToolTip.Tip="Quit the application"
+					Click="Quit_Click"
 					KeyboardNavigation.TabNavigation="None"/>
 			</MenuItem>
 			<MenuItem Header="_Emulator" KeyboardNavigation.TabNavigation="None">
 				<MenuItem
 					x:Name="PlayPauseMenuItem"
 					Header="_Pause"
-					Click="PlayPause_Click"
 					ToolTip.Tip="Toggle play/pause"
+					Click="PlayPause_Click"
 					KeyboardNavigation.TabNavigation="None"/>
 				<MenuItem
 					Header="_Speed"
 					ToolTip.Tip="Change emulation speed"
 					KeyboardNavigation.TabNavigation="None">
 					<MenuItem
+						x:Name="Speed1xMenuItem"
 						Header="_1x"
 						Click="SetSpeed1x_Click"
 						KeyboardNavigation.TabNavigation="None"/>
 					<MenuItem
+						x:Name="Speed2xMenuItem"
 						Header="_2x"
 						Click="SetSpeed2x_Click"
 						KeyboardNavigation.TabNavigation="None"/>
 					<MenuItem
+						x:Name="Speed3xMenuItem"
 						Header="_3x"
 						Click="SetSpeed3x_Click"
 						KeyboardNavigation.TabNavigation="None"/>
 				</MenuItem>
 				<MenuItem
+					x:Name="CaptureScreenshotMenuItem"
 					Header="_Capture screenshot"
-					Click="Screenshot_Click"
 					ToolTip.Tip="Capture a screenshot"
+					Click="Screenshot_Click"
 					KeyboardNavigation.TabNavigation="None"/>
 			</MenuItem>
 		</Menu>

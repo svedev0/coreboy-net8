@@ -12,6 +12,22 @@ public partial class MainWindow : Window
 	public MainWindow()
 	{
 		InitializeComponent();
+
+		Dictionary<MenuItem, KeyGesture> kbShortcuts = new()
+		{
+			{ LoadRomMenuItem, new(Key.O, KeyModifiers.Control) },
+			{ QuitMenuItem, new(Key.Q, KeyModifiers.Control) },
+			{ PlayPauseMenuItem, new(Key.P, KeyModifiers.Control) },
+			{ Speed1xMenuItem, new(Key.D1) },
+			{ Speed2xMenuItem, new(Key.D2) },
+			{ Speed3xMenuItem, new(Key.D3) },
+			{ CaptureScreenshotMenuItem, new(Key.S, KeyModifiers.Control) }
+		};
+
+		foreach ((MenuItem menuItem, KeyGesture keyGesture) in kbShortcuts)
+		{
+			HotKeyManager.SetHotKey(menuItem, keyGesture);
+		}
 	}
 
 	private async void LoadRom_Click(object _, RoutedEventArgs e)
